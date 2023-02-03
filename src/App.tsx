@@ -21,7 +21,13 @@ function App() {
     console.log("App Component Called");
     console.log(`isWeb3Enabled: ${isWeb3Enabled}`);
 
-    return isWeb3Enabled ? <Header /> : <Intro />;
+    return isWeb3Enabled ? (
+        <div className="h-screen mx-72">
+            <Header />
+        </div>
+    ) : (
+        <Intro />
+    );
 }
 
 export default App;

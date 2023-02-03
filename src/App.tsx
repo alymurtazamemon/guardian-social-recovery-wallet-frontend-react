@@ -3,6 +3,7 @@ import "./App.css";
 import Header from "./components/Header";
 import { contractAddresses } from "./constants";
 import { useEffect } from "react";
+import Intro from "./components/Intro";
 
 interface contractAddressesInterface {
     [key: string]: string[];
@@ -20,22 +21,7 @@ function App() {
     console.log("App Component Called");
     console.log(`isWeb3Enabled: ${isWeb3Enabled}`);
 
-    return (
-        <div className="mx-72">
-            <Header />
-            <div className="text-center">
-                {isWeb3Enabled ? (
-                    nftContractAddress ? (
-                        <div>Do You Work</div>
-                    ) : (
-                        <div>Switch Network</div>
-                    )
-                ) : (
-                    <div>Connect Your Wallet First</div>
-                )}
-            </div>
-        </div>
-    );
+    return isWeb3Enabled ? <Header /> : <Intro />;
 }
 
 export default App;

@@ -15,14 +15,24 @@ function Assets(): JSX.Element {
             </h1>
             <h2 className="mt-2 mb-4 text-lg">$16,540,491.77 USD</h2>
             <div className="flex mt-2">
-                <div className="flex flex-col items-center justify-center mx-4">
+                <button
+                    className="flex flex-col items-center justify-center mx-4"
+                    onClick={() => {
+                        console.log("Deposit Clicked!");
+                    }}
+                >
                     <BsFillArrowDownCircleFill color="#0D72C4" size={40} />
                     <h1 className="text-[#0D72C4] m-2">Deposit</h1>
-                </div>
-                <div className="flex flex-col items-center justify-center mx-4">
+                </button>
+                <button
+                    className="flex flex-col items-center justify-center mx-4"
+                    onClick={() => {
+                        console.log("Send Clicked!");
+                    }}
+                >
                     <BsFillArrowUpRightCircleFill color="#0D72C4" size={40} />
                     <h1 className="text-[#0D72C4] m-2">Send</h1>
-                </div>
+                </button>
             </div>
         </div>
     );

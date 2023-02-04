@@ -3,10 +3,11 @@ import { GiWallet, GiTakeMyMoney } from "react-icons/gi";
 import { BsPersonBoundingBox } from "react-icons/bs";
 import { SiAdguard } from "react-icons/si";
 import Assets from "./Assets";
+import FundsManager from "./FundsManager";
 
 function TabsList(): JSX.Element {
     return (
-        <div className="p-12 bg-white h-full">
+        <div className="p-12 bg-white">
             <TabList
                 defaultActiveKey={1}
                 onChange={function noRefCheck() {}}
@@ -41,7 +42,7 @@ function TabsList(): JSX.Element {
                         </div>
                     }
                 >
-                    <p>Tab 2</p>
+                    <FundsManager />
                 </Tab>
                 <Tab
                     tabKey={3}

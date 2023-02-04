@@ -52,6 +52,10 @@ function FundsManager(): JSX.Element {
                     <GuardianAndConfirmation />
                 </ol>
             </div>
+            <div className="flex flex-col items-center mt-4">
+                <TextButton text="Confirm Request" />
+                <TextButton text="Confirm And Update Daily Transfer Limit" />
+            </div>
         </div>
     );
 }

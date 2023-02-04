@@ -1,5 +1,6 @@
 import { AiFillCheckCircle } from "react-icons/ai";
 import { Input } from "@web3uikit/core";
+import TextButton from "./TextButton";
 
 function FundsManager(): JSX.Element {
     return (
@@ -21,14 +22,7 @@ function FundsManager(): JSX.Element {
                     }}
                     width="80%"
                 />
-                <button
-                    className="text-md text-white font-extrabold bg-[#0D72C4] p-4 rounded-full mt-6"
-                    onClick={() => {
-                        console.log("Request Clicked!");
-                    }}
-                >
-                    Request To Update Limit
-                </button>
+                <TextButton text="Request To Update Limit" />
             </div>
             <div className="mt-8">
                 <h1 className="text-2xl text-black font-extrabold">

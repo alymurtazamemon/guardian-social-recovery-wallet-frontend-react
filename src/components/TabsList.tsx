@@ -5,6 +5,7 @@ import { SiAdguard } from "react-icons/si";
 import Assets from "./Assets";
 import FundsManager from "./FundsManager";
 import OwnershipManager from "./OwnershipManager";
+import GuardianManager from "./GuardianManager";
 
 function TabsList(): JSX.Element {
     return (
@@ -75,7 +76,7 @@ function TabsList(): JSX.Element {
                         </div>
                     }
                 >
-                    <p>Tab 4</p>
+                    <GuardianManager />
                 </Tab>
             </TabList>
         </div>

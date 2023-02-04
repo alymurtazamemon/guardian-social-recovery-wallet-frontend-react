@@ -4,10 +4,11 @@ import { BsPersonBoundingBox } from "react-icons/bs";
 import { SiAdguard } from "react-icons/si";
 import Assets from "./Assets";
 import FundsManager from "./FundsManager";
+import OwnershipManager from "./OwnershipManager";
 
 function TabsList(): JSX.Element {
     return (
-        <div className="p-12 bg-white">
+        <div className="p-12 bg-white min-h-screen">
             <TabList
                 defaultActiveKey={1}
                 onChange={function noRefCheck() {}}
@@ -58,7 +59,7 @@ function TabsList(): JSX.Element {
                         </div>
                     }
                 >
-                    <p>Tab 3</p>
+                    <OwnershipManager />
                 </Tab>
                 <Tab
                     tabKey={4}

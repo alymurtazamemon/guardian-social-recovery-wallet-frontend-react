@@ -1,47 +1,47 @@
-import { AiFillCheckCircle } from "react-icons/ai";
 import { Input } from "@web3uikit/core";
 import TextButton from "./TextButton";
 import GuardianAndConfirmation from "./GuardianAndConfirmation";
 
-function FundsManager(): JSX.Element {
+function OwnershipManager(): JSX.Element {
     return (
         <div>
             <div className="flex flex-col justify-czenter items-center mt-8">
                 <h1 className="text-4xl font-bold text-black mt-6">
-                    Daily Withdrawal Limit
+                    Current Wallet Owner
                 </h1>
-                <h2 className="text-4xl font-medium text-black mt-6">1 ETH</h2>
-                <h3 className="mt-2 mb-16 text-lg">$16,540,491.77 USD</h3>
+                <h3 className="mt-6 mb-16 text-lg">
+                    0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+                </h3>
 
                 <Input
-                    label="Amount"
-                    placeholder="Enter Daily Limit Amount"
-                    type="number"
+                    label="New Address"
+                    placeholder="Enter new owner address"
+                    type="text"
                     validation={{
-                        numberMin: 1,
+                        characterMinLength: 42,
+                        characterMaxLength: 42,
                     }}
                     width="80%"
                 />
-                <TextButton text="Request To Update Limit" />
+                <TextButton text="Request To Update Owner" />
             </div>
             <div className="mt-8">
                 <h1 className="text-2xl text-black font-extrabold">
                     Information
                 </h1>
                 <p className="text-lg my-4">
-                    Current Daily Transfer Limit: {1} ETH
-                </p>
-                <p className="text-lg my-4">
-                    Last Daily Tranfer Update Request Time:{" "}
-                    {"01:01:2023 6:17:00 PM"}
+                    Last Owner Update Request Time: {"01:01:2023 6:17:00 PM"}
                 </p>
                 <p className="text-lg my-4">
                     Current Request Status:{" "}
                     <span className="text-[#008001] font-bold">Inactive</span>
                 </p>
                 <p className="text-lg my-4">
-                    Dialy Tranfer Update Confirmation Time Left:{" "}
+                    Owner Update Confirmation Time Left:{" "}
                     {"01:01:2023 6:17:00 PM"}
+                </p>
+                <p className="text-lg my-4">
+                    No of Confirmed Confirmations: {3}
                 </p>
                 <h2 className="text-xl text-black font-bold my-4">
                     Confirmed By:
@@ -53,11 +53,10 @@ function FundsManager(): JSX.Element {
                 </ol>
             </div>
             <div className="flex flex-col items-center mt-4">
-                <TextButton text="Confirm Request" />
-                <TextButton text="Confirm And Update Daily Transfer Limit" />
+                <TextButton text="Confirm Owner Update Request" />
             </div>
         </div>
     );
 }
 
-export default FundsManager;
+export default OwnershipManager;

@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import { contractAddresses } from "./constants";
 import { useEffect } from "react";
 import Intro from "./components/Intro";
+import TabsList from "./components/TabsList";
 
 interface contractAddressesInterface {
     [key: string]: string[];
@@ -24,6 +25,7 @@ function App() {
     return isWeb3Enabled ? (
         <div className="h-screen mx-72">
             <Header />
+            <TabsList />
         </div>
     ) : (
         <Intro />

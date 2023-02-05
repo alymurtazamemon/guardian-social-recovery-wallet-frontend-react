@@ -71,6 +71,15 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                     <BsFillArrowUpRightCircleFill color="#0D72C4" size={40} />
                     <h1 className="text-[#0D72C4] m-2">Send</h1>
                 </button>
+                <button
+                    className="flex flex-col items-center justify-center mx-4"
+                    onClick={() => {
+                        console.log("Send Clicked!");
+                    }}
+                >
+                    <BsFillArrowUpRightCircleFill color="#0D72C4" size={40} />
+                    <h1 className="text-[#0D72C4] m-2">Send All</h1>
+                </button>
             </div>
             <Input
                 label="Amount"

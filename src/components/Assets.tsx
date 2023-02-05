@@ -14,6 +14,7 @@ interface AssetsPropsTypes {
 
 function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
     const [walletBalance, setWalletBalance] = useState("0");
+    const [walletBalanceInUSD, setWalletBalanceInUSD] = useState("0");
 
     const { runContractFunction: getBalance } = useWeb3Contract({
         abi: abi,
@@ -22,10 +23,20 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         params: {},
     });
 
+    const { runContractFunction: getBalanceInUSD } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "getBalanceInUSD",
+        params: {},
+    });
+
     useEffect(() => {
         (async () => {
             const balance = (await getBalance()) as String;
             setWalletBalance(balance.toString());
+
+            const balanceInUSD = (await getBalanceInUSD()) as String;
+            setWalletBalanceInUSD(balanceInUSD.toString());
         })();
     }, []);
 
@@ -37,7 +48,9 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
             <h1 className="text-4xl font-medium text-black mt-6">
                 {ethers.formatEther(walletBalance)} ETH
             </h1>
-            <h2 className="mt-2 mb-4 text-lg">$16,540,491.77 USD</h2>
+            <h2 className="mt-2 mb-4 text-lg">
+                ${ethers.formatEther(walletBalanceInUSD)} USD
+            </h2>
             <div className="flex mt-2">
                 <button
                     className="flex flex-col items-center justify-center mx-4"

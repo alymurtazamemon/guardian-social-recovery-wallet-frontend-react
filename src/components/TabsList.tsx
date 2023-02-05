@@ -6,8 +6,20 @@ import Assets from "./Assets";
 import FundsManager from "./FundsManager";
 import OwnershipManager from "./OwnershipManager";
 import GuardianManager from "./GuardianManager";
+import { contractAddresses } from "../constants";
+import { useMoralis } from "react-moralis";
+
+interface contractAddressesInterface {
+    [key: string]: string[];
+}
 
 function TabsList(): JSX.Element {
+    const addresses: contractAddressesInterface = contractAddresses;
+    const { chainId: chainIdHex } = useMoralis();
+    const chainId: string = parseInt(chainIdHex!).toString();
+    const guardianContractAddress =
+        chainId in addresses ? addresses[chainId][0] : null;
+
     return (
         <div className="p-12 bg-white min-h-screen">
             <TabList
@@ -28,7 +40,9 @@ function TabsList(): JSX.Element {
                         </div>
                     }
                 >
-                    <Assets />
+                    <Assets
+                        guardianContractAddress={guardianContractAddress!}
+                    />
                 </Tab>
                 <Tab
                     tabKey={2}

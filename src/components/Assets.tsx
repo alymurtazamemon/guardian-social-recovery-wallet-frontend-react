@@ -3,15 +3,39 @@ import {
     BsFillArrowDownCircleFill,
     BsFillArrowUpRightCircleFill,
 } from "react-icons/bs";
+import { useMoralis, useWeb3Contract } from "react-moralis";
+import { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import { abi } from "../constants";
 
-function Assets(): JSX.Element {
+interface AssetsPropsTypes {
+    guardianContractAddress: string;
+}
+
+function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
+    const [walletBalance, setWalletBalance] = useState("0");
+
+    const { runContractFunction: getBalance } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "getBalance",
+        params: {},
+    });
+
+    useEffect(() => {
+        (async () => {
+            const balance = (await getBalance()) as String;
+            setWalletBalance(balance.toString());
+        })();
+    }, []);
+
     return (
         <div className="flex flex-col justify-czenter items-center mt-8">
             <div className="border border-gray-400 w-fit p-2 rounded-full">
                 <SiEthereum color="black" size={22} />
             </div>
             <h1 className="text-4xl font-medium text-black mt-6">
-                9999.999 ETH
+                {ethers.formatEther(walletBalance)} ETH
             </h1>
             <h2 className="mt-2 mb-4 text-lg">$16,540,491.77 USD</h2>
             <div className="flex mt-2">

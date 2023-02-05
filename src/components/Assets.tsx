@@ -7,6 +7,7 @@ import { useMoralis, useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { abi } from "../constants";
+import { Input } from "@web3uikit/core";
 
 interface AssetsPropsTypes {
     guardianContractAddress: string;
@@ -71,6 +72,31 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                     <h1 className="text-[#0D72C4] m-2">Send</h1>
                 </button>
             </div>
+            <Input
+                label="Amount"
+                placeholder="Enter Amount to Deposit/Send"
+                type="number"
+                validation={{
+                    numberMin: 0,
+                }}
+                width="80%"
+                style={{
+                    marginTop: "32px",
+                }}
+            />
+            <Input
+                label="Address"
+                placeholder="Enter Address to Send Funds"
+                type="text"
+                validation={{
+                    characterMinLength: 42,
+                    characterMaxLength: 42,
+                }}
+                width="80%"
+                style={{
+                    marginTop: "32px",
+                }}
+            />
         </div>
     );
 }

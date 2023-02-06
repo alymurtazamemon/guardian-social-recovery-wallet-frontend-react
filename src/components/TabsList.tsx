@@ -91,7 +91,9 @@ function TabsList(): JSX.Element {
                         </div>
                     }
                 >
-                    <GuardianManager />
+                    <GuardianManager
+                        guardianContractAddress={guardianContractAddress!}
+                    />
                 </Tab>
             </TabList>
         </div>

@@ -1,7 +1,13 @@
 import { Input } from "@web3uikit/core";
 import TextButton from "./TextButton";
 
-function GuardianManager(): JSX.Element {
+interface GuardianManagerPropsTypes {
+    guardianContractAddress: string;
+}
+
+function GuardianManager({
+    guardianContractAddress,
+}: GuardianManagerPropsTypes): JSX.Element {
     return (
         <div>
             <div className="flex flex-col justify-czenter items-center mt-8">

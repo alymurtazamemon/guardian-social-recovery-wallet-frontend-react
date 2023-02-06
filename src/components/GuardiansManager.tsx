@@ -134,6 +134,17 @@ function GuardiansManager({
         setNewGuardian(undefined);
     }
 
+    function handleRemoveGuardianOnClick() {
+        if (removeGuardian == undefined) {
+            _showNotification(
+                NotificationType.warning,
+                "Address Not Found",
+                "Please input the address of existing guardian."
+            );
+            return;
+        }
+    }
+
     function _handleAllErrors(error: Error) {
         if (error.message.includes("User denied transaction signature.")) {
             _showNotification(
@@ -304,7 +315,10 @@ function GuardiansManager({
                     value={removeGuardian}
                     onChange={(event) => setRemoveGuardian(event.target.value)}
                 />
-                <TextButton text="Remove Guardian" />
+                <TextButton
+                    text="Remove Guardian"
+                    onClick={handleRemoveGuardianOnClick}
+                />
             </div>
         </div>
     );

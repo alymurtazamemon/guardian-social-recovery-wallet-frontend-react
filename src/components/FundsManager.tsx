@@ -15,6 +15,8 @@ function FundsManager({
     guardianContractAddress,
 }: FundsManagerPropsTypes): JSX.Element {
     const [dailyTransferLimit, setDailyTransferLimit] = useState<string>("0");
+    const [dailyTransferLimitInUsd, setDailyTransferLimitInUsd] =
+        useState<string>("0");
 
     const { runContractFunction: getDailyTransferLimit } = useWeb3Contract({
         abi: abi,
@@ -23,10 +25,23 @@ function FundsManager({
         params: {},
     });
 
+    const { runContractFunction: getDailyTransferLimitInUSD } = useWeb3Contract(
+        {
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "getDailyTransferLimitInUSD",
+            params: {},
+        }
+    );
+
     useEffect(() => {
         (async () => {
             const dailyLimit = (await getDailyTransferLimit()) as String;
             setDailyTransferLimit(dailyLimit.toString());
+
+            const dailyLimitInUsd =
+                (await getDailyTransferLimitInUSD()) as String;
+            setDailyTransferLimitInUsd(dailyLimitInUsd.toString());
         })();
     }, []);
 
@@ -39,7 +54,9 @@ function FundsManager({
                 <h2 className="text-4xl font-medium text-black mt-6">
                     {ethers.utils.formatEther(dailyTransferLimit)} ETH
                 </h2>
-                <h3 className="mt-2 mb-16 text-lg">$16,540,491.77 USD</h3>
+                <h3 className="mt-2 mb-16 text-lg">
+                    ${ethers.utils.formatEther(dailyTransferLimitInUsd)} USD
+                </h3>
 
                 <Input
                     label="Amount"

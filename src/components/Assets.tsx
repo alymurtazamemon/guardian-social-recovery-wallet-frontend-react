@@ -169,6 +169,12 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 "Invalid Amount Error",
                 "The amount entered is not valid. Please check and enter a valid amount."
             );
+        } else if (error.message.includes("Error__DailyTransferLimitExceed")) {
+            showNotification(
+                NotificationType.error,
+                "Daily Transfer Limit Exceeded",
+                "The transfer amount exceeds your daily transfer limit. Please try a smaller amount or request to increase limit."
+            );
         }
     }
 

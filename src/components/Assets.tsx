@@ -63,7 +63,6 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         functionName: "sendAll",
         params: {
             to: address,
-            amount: walletBalance,
         },
     });
 

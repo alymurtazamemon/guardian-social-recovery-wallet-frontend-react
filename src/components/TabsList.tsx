@@ -59,7 +59,9 @@ function TabsList(): JSX.Element {
                         </div>
                     }
                 >
-                    <FundsManager />
+                    <FundsManager
+                        guardianContractAddress={guardianContractAddress!}
+                    />
                 </Tab>
                 <Tab
                     tabKey={3}

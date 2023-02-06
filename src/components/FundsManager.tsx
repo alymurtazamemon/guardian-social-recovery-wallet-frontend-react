@@ -2,15 +2,43 @@ import { AiFillCheckCircle } from "react-icons/ai";
 import { Input } from "@web3uikit/core";
 import TextButton from "./TextButton";
 import GuardianAndConfirmation from "./GuardianAndConfirmation";
+import { abi } from "../constants";
+import { useWeb3Contract } from "react-moralis";
+import { useEffect, useState } from "react";
+import { BigNumber, ethers } from "ethers";
 
-function FundsManager(): JSX.Element {
+interface FundsManagerPropsTypes {
+    guardianContractAddress: string;
+}
+
+function FundsManager({
+    guardianContractAddress,
+}: FundsManagerPropsTypes): JSX.Element {
+    const [dailyTransferLimit, setDailyTransferLimit] = useState<string>("0");
+
+    const { runContractFunction: getDailyTransferLimit } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "getDailyTransferLimit",
+        params: {},
+    });
+
+    useEffect(() => {
+        (async () => {
+            const dailyLimit = (await getDailyTransferLimit()) as String;
+            setDailyTransferLimit(dailyLimit.toString());
+        })();
+    }, []);
+
     return (
         <div>
             <div className="flex flex-col justify-czenter items-center mt-8">
                 <h1 className="text-4xl font-bold text-black mt-6">
                     Daily Withdrawal Limit
                 </h1>
-                <h2 className="text-4xl font-medium text-black mt-6">1 ETH</h2>
+                <h2 className="text-4xl font-medium text-black mt-6">
+                    {ethers.utils.formatEther(dailyTransferLimit)} ETH
+                </h2>
                 <h3 className="mt-2 mb-16 text-lg">$16,540,491.77 USD</h3>
 
                 <Input

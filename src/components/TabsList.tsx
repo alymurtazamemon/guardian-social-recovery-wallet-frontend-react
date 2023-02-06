@@ -8,6 +8,7 @@ import OwnershipManager from "./OwnershipManager";
 import GuardianManager from "./GuardianManager";
 import { contractAddresses } from "../constants";
 import { useMoralis } from "react-moralis";
+import { useState } from "react";
 
 interface contractAddressesInterface {
     [key: string]: string[];

@@ -188,7 +188,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         _showNotification(
             NotificationType.success,
             "Successs",
-            `${amount} ETH sent to ${address}`
+            `${ethers.utils.formatEther(walletBalance)} ETH sent to ${address}`
         );
 
         setAmount(undefined);
@@ -201,6 +201,12 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 NotificationType.error,
                 "Permission Denied",
                 "User denied transaction signature."
+            );
+        } else if (error.message.toLowerCase().includes("nonce too high")) {
+            _showNotification(
+                NotificationType.error,
+                "Invalid Nonce",
+                "Reset your Metamask."
             );
         } else if (error.message.includes("Error__InvalidAmount")) {
             _showNotification(

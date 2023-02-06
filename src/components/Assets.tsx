@@ -146,12 +146,17 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
     async function handleSendOnSuccess(tx: ContractTransaction) {
         await tx.wait(1);
 
+        const balance = (await getBalance()) as String;
+        const balanceInUSD = (await getBalanceInUSD()) as String;
+
         _showNotification(
             NotificationType.success,
             "Successs",
             `${amount} ETH sent to ${address}`
         );
 
+        setWalletBalance(balance.toString());
+        setWalletBalanceInUSD(balanceInUSD.toString());
         setAmount(undefined);
         setAddress("");
     }

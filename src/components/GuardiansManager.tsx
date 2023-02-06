@@ -4,7 +4,7 @@ import { abi } from "../constants";
 import { useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
 import { AiFillBell } from "react-icons/ai";
-import { ContractTransaction } from "ethers";
+import { BigNumber, ContractTransaction } from "ethers";
 
 interface GuardianManagerPropsTypes {
     guardianContractAddress: string;
@@ -26,6 +26,7 @@ function GuardiansManager({
     const [oldGuardian, setOldGuardian] = useState<string>();
     const [newGuardian, setNewGuardian] = useState<string>();
     const [removeGuardian, setRemoveGuardian] = useState<string>();
+    const [lastGuardianAddTime, setLastGuardianAddTime] = useState<string>();
 
     const { runContractFunction: getGuardians } = useWeb3Contract({
         abi: abi,
@@ -62,10 +63,21 @@ function GuardiansManager({
         },
     });
 
+    const { runContractFunction: getLastGuardianAddTime } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "getLastGuardianAddTime",
+        params: {},
+    });
+
     useEffect(() => {
         (async () => {
             const guardians = (await getGuardians()) as string[];
             setGuardians(guardians);
+
+            const addTimestamp = (await getLastGuardianAddTime()) as BigNumber;
+            var dateFormat = new Date(addTimestamp.toNumber() * 1000);
+            setLastGuardianAddTime(dateFormat.toString());
         })();
     }, []);
 
@@ -90,6 +102,8 @@ function GuardiansManager({
         await tx.wait(1);
 
         const guardians = (await getGuardians()) as string[];
+        const addTimestamp = (await getLastGuardianAddTime()) as BigNumber;
+        var dateFormat = new Date(addTimestamp.toNumber() * 1000);
 
         _showNotification(
             NotificationType.success,
@@ -98,6 +112,7 @@ function GuardiansManager({
         );
 
         setGuardians(guardians);
+        setLastGuardianAddTime(dateFormat.toString());
         setGuardian(undefined);
     }
 
@@ -279,19 +294,19 @@ function GuardiansManager({
                     Information
                 </h1>
                 <p className="text-lg my-4">
-                    Delay Required between Adding the Guardians: {"01 Day"}
+                    Delay Required between Adding the Guardians: 1 Day
                 </p>
                 <p className="text-lg my-4">
-                    Last Guardian Added on: {"01:01:2023 6:17:00 PM"}
+                    Last Guardian Added on: {lastGuardianAddTime?.toString()}
                 </p>
                 <p className="text-lg my-4">
-                    Delay Required between Changing the Guardians: {"01 Day"}
+                    Delay Required between Changing the Guardians: 1 Day
                 </p>
                 <p className="text-lg my-4">
                     Last Guardian Changed on: {"01:01:2023 6:17:00 PM"}
                 </p>
                 <p className="text-lg my-4">
-                    Delay Required between Removing the Guardians: {"01 Day"}
+                    Delay Required between Removing the Guardians: 3 Days
                 </p>
                 <p className="text-lg my-4">
                     Last Guardian Removed on: {"01:01:2023 6:17:00 PM"}

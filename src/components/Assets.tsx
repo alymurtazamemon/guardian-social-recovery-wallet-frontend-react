@@ -163,6 +163,12 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 "Permission Denied",
                 "User denied transaction signature."
             );
+        } else if (error.message.includes("Error__InvalidAmount")) {
+            showNotification(
+                NotificationType.error,
+                "Invalid Amount Error",
+                "The amount entered is not valid. Please check and enter a valid amount."
+            );
         }
     }
 

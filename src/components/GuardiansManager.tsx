@@ -53,6 +53,15 @@ function GuardiansManager({
         },
     });
 
+    const { runContractFunction: removeGuardianFunction } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "removeGuardian",
+        params: {
+            guardian: removeGuardian,
+        },
+    });
+
     useEffect(() => {
         (async () => {
             const guardians = (await getGuardians()) as string[];
@@ -134,7 +143,7 @@ function GuardiansManager({
         setNewGuardian(undefined);
     }
 
-    function handleRemoveGuardianOnClick() {
+    async function handleRemoveGuardianOnClick() {
         if (removeGuardian == undefined) {
             _showNotification(
                 NotificationType.warning,
@@ -143,6 +152,27 @@ function GuardiansManager({
             );
             return;
         }
+
+        await removeGuardianFunction({
+            onSuccess: (tx) =>
+                handleRemoveGuardianOnSuccess(tx as ContractTransaction),
+            onError: _handleAllErrors,
+        });
+    }
+
+    async function handleRemoveGuardianOnSuccess(tx: ContractTransaction) {
+        await tx.wait(1);
+
+        const guardians = (await getGuardians()) as string[];
+
+        _showNotification(
+            NotificationType.success,
+            "Success",
+            `Removed Guardian with Address ${removeGuardian}`
+        );
+
+        setGuardians(guardians);
+        setRemoveGuardian(undefined);
     }
 
     function _handleAllErrors(error: Error) {
@@ -183,8 +213,22 @@ function GuardiansManager({
         } else if (error.message.includes("Error__GuardianDoesNotExist")) {
             _showNotification(
                 NotificationType.error,
-                "Guardian Guardian Not Found",
+                "Guardian Not Found",
                 "The guardian does not exist in the guardians list. Please check the information and try again."
+            );
+        } else if (
+            error.message.includes("Error__CanOnlyRemoveAfterDelayPeriod")
+        ) {
+            _showNotification(
+                NotificationType.error,
+                "Removal Not Allowed",
+                "You can only remove after the delay period. Please wait until the delay period is over and try again."
+            );
+        } else if (error.message.includes("Error__GuardiansListIsEmpty")) {
+            _showNotification(
+                NotificationType.error,
+                "Empty Guardians List",
+                "The list of guardians is empty. Please add a guardian and try again."
             );
         } else {
             _showNotification(

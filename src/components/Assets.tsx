@@ -78,24 +78,36 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         }
 
         if (typeof ethereum != "undefined") {
-            const provider = new ethers.providers.Web3Provider(ethereum);
-            const signer = provider.getSigner();
+            try {
+                const provider = new ethers.providers.Web3Provider(ethereum);
+                const signer = provider.getSigner();
 
-            const tx: ContractTransaction = await signer.sendTransaction({
-                to: guardianContractAddress,
-                data: "0x",
-                value: ethers.utils.parseEther(amount.toString()),
-            });
+                const tx: ContractTransaction = await signer.sendTransaction({
+                    to: guardianContractAddress,
+                    data: "0x",
+                    value: ethers.utils.parseEther(amount.toString()),
+                });
 
-            await tx.wait(1);
+                await tx.wait(1);
 
-            showNotification(
-                NotificationType.success,
-                "Successs",
-                `${amount} ETH successfully deposited.`
-            );
+                showNotification(
+                    NotificationType.success,
+                    "Successs",
+                    `${amount} ETH successfully deposited.`
+                );
 
-            setAmount(undefined);
+                setAmount(undefined);
+            } catch (error: any) {
+                if (
+                    error.message.includes("User denied transaction signature.")
+                ) {
+                    showNotification(
+                        NotificationType.error,
+                        "Permission Denied",
+                        "User denied transaction signature."
+                    );
+                }
+            }
         }
     }
 
@@ -138,7 +150,15 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         setAddress("");
     }
 
-    function handleSendOnError(error: Error) {}
+    function handleSendOnError(error: Error) {
+        if (error.message.includes("User denied transaction signature.")) {
+            showNotification(
+                NotificationType.error,
+                "Permission Denied",
+                "User denied transaction signature."
+            );
+        }
+    }
 
     function showNotification(
         type: NotificationType,

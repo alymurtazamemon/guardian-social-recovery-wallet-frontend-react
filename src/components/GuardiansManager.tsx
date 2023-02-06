@@ -109,6 +109,28 @@ function GuardiansManager({
             );
             return;
         }
+
+        await changeGuardian({
+            onSuccess: (tx) =>
+                handleChangeGuardianOnSuccess(tx as ContractTransaction),
+            onError: _handleAllErrors,
+        });
+    }
+
+    async function handleChangeGuardianOnSuccess(tx: ContractTransaction) {
+        await tx.wait(1);
+
+        const guardians = (await getGuardians()) as string[];
+
+        _showNotification(
+            NotificationType.success,
+            "Success",
+            `Guardian Changed from ${oldGuardian} to ${newGuardian}`
+        );
+
+        setGuardians(guardians);
+        setOldGuardian(undefined);
+        setNewGuardian(undefined);
     }
 
     function _handleAllErrors(error: Error) {
@@ -137,6 +159,20 @@ function GuardiansManager({
                 NotificationType.error,
                 "Guardian Addition Not Allowed",
                 "You can only add a guardian after the delay period. Please wait until the delay period is over and try again."
+            );
+        } else if (
+            error.message.includes("Error__CanOnlyChangeAfterDelayPeriod")
+        ) {
+            _showNotification(
+                NotificationType.error,
+                "Guardian Change Not Allowed",
+                "You can only change a guardian after the delay period. Please wait until the delay period is over and try again."
+            );
+        } else if (error.message.includes("Error__GuardianDoesNotExist")) {
+            _showNotification(
+                NotificationType.error,
+                "Guardian Guardian Not Found",
+                "The guardian does not exist in the guardians list. Please check the information and try again."
             );
         } else {
             _showNotification(

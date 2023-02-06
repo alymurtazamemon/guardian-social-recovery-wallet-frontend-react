@@ -175,6 +175,12 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 "Daily Transfer Limit Exceeded",
                 "The transfer amount exceeds your daily transfer limit. Please try a smaller amount or request to increase limit."
             );
+        } else if (error.message.includes("Error__TransactionFailed")) {
+            showNotification(
+                NotificationType.error,
+                "Transaction Failed",
+                "Your transaction was unsuccessful. Please try again later."
+            );
         }
     }
 

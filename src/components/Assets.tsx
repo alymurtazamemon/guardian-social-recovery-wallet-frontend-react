@@ -139,7 +139,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
 
         await send({
             onSuccess: (tx) => handleSendOnSuccess(tx as ContractTransaction),
-            onError: (error) => handleSendOnError,
+            onError: handleSendOnError,
         });
     }
 
@@ -168,6 +168,12 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 NotificationType.error,
                 "Invalid Amount Error",
                 "The amount entered is not valid. Please check and enter a valid amount."
+            );
+        } else if (error.message.includes("Ownable: caller is not the owner")) {
+            showNotification(
+                NotificationType.error,
+                "Access Denied",
+                "The caller is not the owner and does not have permission to perform this action."
             );
         } else if (error.message.includes("Error__DailyTransferLimitExceed")) {
             showNotification(

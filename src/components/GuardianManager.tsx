@@ -1,5 +1,8 @@
 import { Input } from "@web3uikit/core";
 import TextButton from "./TextButton";
+import { abi } from "../constants";
+import { useWeb3Contract } from "react-moralis";
+import { useEffect, useState } from "react";
 
 interface GuardianManagerPropsTypes {
     guardianContractAddress: string;
@@ -8,6 +11,22 @@ interface GuardianManagerPropsTypes {
 function GuardianManager({
     guardianContractAddress,
 }: GuardianManagerPropsTypes): JSX.Element {
+    const [guardians, setGuardians] = useState<string[]>([]);
+
+    const { runContractFunction: getGuardians } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "getGuardians",
+        params: {},
+    });
+
+    useEffect(() => {
+        (async () => {
+            const guardians = (await getGuardians()) as string[];
+            setGuardians(guardians);
+        })();
+    }, []);
+
     return (
         <div>
             <div className="flex flex-col justify-czenter items-center mt-8">
@@ -15,15 +34,13 @@ function GuardianManager({
                     Your Wallet Guardians
                 </h1>
                 <ol className="mt-4 mb-4">
-                    <li className="mt-4">
-                        1. 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
-                    </li>
-                    <li className="mt-4">
-                        1. 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
-                    </li>
-                    <li className="mt-4">
-                        1. 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
-                    </li>
+                    {guardians.map((guardian, index) => {
+                        return (
+                            <li key={index} className="mt-4">
+                                {index + 1}. {guardian}
+                            </li>
+                        );
+                    })}
                 </ol>
             </div>
             <div className="mb-16">

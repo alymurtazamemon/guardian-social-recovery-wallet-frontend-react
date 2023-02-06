@@ -79,7 +79,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
 
     async function handleOnDepositClick() {
         if (amount == undefined) {
-            showNotification(
+            _showNotification(
                 NotificationType.warning,
                 "Amount Not Found",
                 "Please input deposit amount in the amount field."
@@ -100,7 +100,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
 
                 await tx.wait(1);
 
-                showNotification(
+                _showNotification(
                     NotificationType.success,
                     "Successs",
                     `${amount} ETH successfully deposited.`
@@ -111,13 +111,13 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 if (
                     error.message.includes("User denied transaction signature.")
                 ) {
-                    showNotification(
+                    _showNotification(
                         NotificationType.error,
                         "Permission Denied",
                         "User denied transaction signature."
                     );
                 } else {
-                    showNotification(
+                    _showNotification(
                         NotificationType.error,
                         error.name,
                         error.message
@@ -129,7 +129,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
 
     async function handleOnSendClick() {
         if (amount == undefined) {
-            showNotification(
+            _showNotification(
                 NotificationType.warning,
                 "Amount Not Found",
                 "Please input deposit amount in the amount field."
@@ -139,7 +139,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         }
 
         if (address == "") {
-            showNotification(
+            _showNotification(
                 NotificationType.warning,
                 "Address Not Found",
                 "Please input the address of receiver."
@@ -149,14 +149,14 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
 
         await send({
             onSuccess: (tx) => handleSendOnSuccess(tx as ContractTransaction),
-            onError: handleSendOnError,
+            onError: _handleAllErrors,
         });
     }
 
     async function handleSendOnSuccess(tx: ContractTransaction) {
         await tx.wait(1);
 
-        showNotification(
+        _showNotification(
             NotificationType.success,
             "Successs",
             `${amount} ETH sent to ${address}`
@@ -166,45 +166,9 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         setAddress("");
     }
 
-    function handleSendOnError(error: Error) {
-        if (error.message.includes("User denied transaction signature.")) {
-            showNotification(
-                NotificationType.error,
-                "Permission Denied",
-                "User denied transaction signature."
-            );
-        } else if (error.message.includes("Error__InvalidAmount")) {
-            showNotification(
-                NotificationType.error,
-                "Invalid Amount Error",
-                "The amount entered is not valid. Please check and enter a valid amount."
-            );
-        } else if (error.message.includes("Ownable: caller is not the owner")) {
-            showNotification(
-                NotificationType.error,
-                "Access Denied",
-                "The caller is not the owner and does not have permission to perform this action."
-            );
-        } else if (error.message.includes("Error__DailyTransferLimitExceed")) {
-            showNotification(
-                NotificationType.error,
-                "Daily Transfer Limit Exceeded",
-                "The transfer amount exceeds your daily transfer limit. Please try a smaller amount or request to increase limit."
-            );
-        } else if (error.message.includes("Error__TransactionFailed")) {
-            showNotification(
-                NotificationType.error,
-                "Transaction Failed",
-                "Your transaction was unsuccessful. Please try again later."
-            );
-        } else {
-            showNotification(NotificationType.error, error.name, error.message);
-        }
-    }
-
     async function handleOnSendAllClick() {
         if (address == "") {
-            showNotification(
+            _showNotification(
                 NotificationType.warning,
                 "Address Not Found",
                 "Please input the address of receiver."
@@ -215,14 +179,14 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         await sendAll({
             onSuccess: (tx) =>
                 handleSendAllOnSuccess(tx as ContractTransaction),
-            onError: handleSendAllOnError,
+            onError: _handleAllErrors,
         });
     }
 
     async function handleSendAllOnSuccess(tx: ContractTransaction) {
         await tx.wait(1);
 
-        showNotification(
+        _showNotification(
             NotificationType.success,
             "Successs",
             `${amount} ETH sent to ${address}`
@@ -232,9 +196,53 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         setAddress("");
     }
 
-    function handleSendAllOnError(error: Error) {}
+    function _handleAllErrors(error: Error) {
+        if (error.message.includes("User denied transaction signature.")) {
+            _showNotification(
+                NotificationType.error,
+                "Permission Denied",
+                "User denied transaction signature."
+            );
+        } else if (error.message.includes("Error__InvalidAmount")) {
+            _showNotification(
+                NotificationType.error,
+                "Invalid Amount Error",
+                "The amount entered is not valid. Please check and enter a valid amount."
+            );
+        } else if (error.message.includes("Ownable: caller is not the owner")) {
+            _showNotification(
+                NotificationType.error,
+                "Access Denied",
+                "The caller is not the owner and does not have permission to perform this action."
+            );
+        } else if (error.message.includes("Error__DailyTransferLimitExceed")) {
+            _showNotification(
+                NotificationType.error,
+                "Daily Transfer Limit Exceeded",
+                "The transfer amount exceeds your daily transfer limit. Please try a smaller amount or request to increase limit."
+            );
+        } else if (error.message.includes("Error__TransactionFailed")) {
+            _showNotification(
+                NotificationType.error,
+                "Transaction Failed",
+                "Your transaction was unsuccessful. Please try again later."
+            );
+        } else if (error.message.includes("Error__BalanceIsZero")) {
+            _showNotification(
+                NotificationType.error,
+                "Insufficient Balance",
+                "Your account balance is zero. Please add funds to your account and try again."
+            );
+        } else {
+            _showNotification(
+                NotificationType.error,
+                error.name,
+                error.message
+            );
+        }
+    }
 
-    function showNotification(
+    function _showNotification(
         type: NotificationType,
         title: string,
         message: string

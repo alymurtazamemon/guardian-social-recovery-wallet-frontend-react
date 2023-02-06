@@ -10,6 +10,12 @@ import { Input, useNotification } from "@web3uikit/core";
 import { AiFillBell } from "react-icons/ai";
 import { ContractTransaction, ethers } from "ethers";
 
+enum NotificationType {
+    warning,
+    success,
+    error,
+}
+
 interface AssetsPropsTypes {
     guardianContractAddress: string;
 }
@@ -38,6 +44,19 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         params: {},
     });
 
+    const { runContractFunction: send } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "send",
+        params: {
+            to: address,
+            amount:
+                amount != undefined
+                    ? ethers.utils.parseEther(amount!.toString())
+                    : "0",
+        },
+    });
+
     useEffect(() => {
         (async () => {
             const balance = (await getBalance()) as String;
@@ -50,13 +69,11 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
 
     async function handleOnDepositClick() {
         if (amount == undefined) {
-            dispatch({
-                type: "warning",
-                title: "Amount Not Found",
-                message: "Please enter deposit amount in the amount field.",
-                icon: <AiFillBell />,
-                position: "topR",
-            });
+            showNotification(
+                NotificationType.warning,
+                "Amount Not Found",
+                "Please input deposit amount in the amount field."
+            );
             return;
         }
 
@@ -72,16 +89,74 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
 
             await tx.wait(1);
 
-            dispatch({
-                type: "success",
-                title: "Successs",
-                message: `${amount} successfully deposited.`,
-                icon: <AiFillBell />,
-                position: "topR",
-            });
+            showNotification(
+                NotificationType.success,
+                "Successs",
+                `${amount} ETH successfully deposited.`
+            );
 
             setAmount(undefined);
         }
+    }
+
+    async function handleOnSendClick() {
+        if (amount == undefined) {
+            showNotification(
+                NotificationType.warning,
+                "Amount Not Found",
+                "Please input deposit amount in the amount field."
+            );
+
+            return;
+        }
+
+        if (address == "") {
+            showNotification(
+                NotificationType.warning,
+                "Address Not Found",
+                "Please input the address of receiver."
+            );
+            return;
+        }
+
+        await send({
+            onSuccess: (tx) => handleSendOnSuccess(tx as ContractTransaction),
+            onError: (error) => handleSendOnError,
+        });
+    }
+
+    async function handleSendOnSuccess(tx: ContractTransaction) {
+        await tx.wait(1);
+
+        showNotification(
+            NotificationType.success,
+            "Successs",
+            `${amount} ETH sent to ${address}`
+        );
+
+        setAmount(undefined);
+        setAddress("");
+    }
+
+    function handleSendOnError(error: Error) {}
+
+    function showNotification(
+        type: NotificationType,
+        title: string,
+        message: string
+    ) {
+        dispatch({
+            type:
+                type == NotificationType.warning
+                    ? "warning"
+                    : type == NotificationType.success
+                    ? "success"
+                    : "error",
+            title: title,
+            message: message,
+            icon: <AiFillBell />,
+            position: "topR",
+        });
     }
 
     return (
@@ -105,9 +180,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 </button>
                 <button
                     className="flex flex-col items-center justify-center mx-4"
-                    onClick={() => {
-                        console.log("Send Clicked!");
-                    }}
+                    onClick={handleOnSendClick}
                 >
                     <BsFillArrowUpRightCircleFill color="#0D72C4" size={40} />
                     <h1 className="text-[#0D72C4] m-2">Send</h1>

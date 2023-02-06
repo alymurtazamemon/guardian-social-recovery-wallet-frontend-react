@@ -27,6 +27,8 @@ function GuardiansManager({
     const [newGuardian, setNewGuardian] = useState<string>();
     const [removeGuardian, setRemoveGuardian] = useState<string>();
     const [lastGuardianAddTime, setLastGuardianAddTime] = useState<string>();
+    const [lastGuardianChangeTime, setLastGuardianChangeTime] =
+        useState<string>();
 
     const { runContractFunction: getGuardians } = useWeb3Contract({
         abi: abi,
@@ -70,14 +72,33 @@ function GuardiansManager({
         params: {},
     });
 
+    const { runContractFunction: getLastGuardianChangeTime } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "getLastGuardianChangeTime",
+        params: {},
+    });
+
     useEffect(() => {
         (async () => {
             const guardians = (await getGuardians()) as string[];
             setGuardians(guardians);
 
             const addTimestamp = (await getLastGuardianAddTime()) as BigNumber;
-            var dateFormat = new Date(addTimestamp.toNumber() * 1000);
-            setLastGuardianAddTime(dateFormat.toString());
+
+            setLastGuardianAddTime(
+                addTimestamp.toNumber() == 0
+                    ? "Never Added"
+                    : new Date(addTimestamp.toNumber() * 1000).toString()
+            );
+
+            const changeTimestamp =
+                (await getLastGuardianChangeTime()) as BigNumber;
+            setLastGuardianChangeTime(
+                changeTimestamp.toNumber() == 0
+                    ? "Never Changed"
+                    : new Date(changeTimestamp.toNumber() * 1000).toString()
+            );
         })();
     }, []);
 
@@ -103,7 +124,6 @@ function GuardiansManager({
 
         const guardians = (await getGuardians()) as string[];
         const addTimestamp = (await getLastGuardianAddTime()) as BigNumber;
-        var dateFormat = new Date(addTimestamp.toNumber() * 1000);
 
         _showNotification(
             NotificationType.success,
@@ -112,7 +132,11 @@ function GuardiansManager({
         );
 
         setGuardians(guardians);
-        setLastGuardianAddTime(dateFormat.toString());
+        setLastGuardianAddTime(
+            addTimestamp.toNumber() == 0
+                ? "Never Added"
+                : new Date(addTimestamp.toNumber() * 1000).toString()
+        );
         setGuardian(undefined);
     }
 
@@ -146,6 +170,8 @@ function GuardiansManager({
         await tx.wait(1);
 
         const guardians = (await getGuardians()) as string[];
+        const changeTimestamp =
+            (await getLastGuardianChangeTime()) as BigNumber;
 
         _showNotification(
             NotificationType.success,
@@ -154,6 +180,11 @@ function GuardiansManager({
         );
 
         setGuardians(guardians);
+        setLastGuardianChangeTime(
+            changeTimestamp.toNumber() == 0
+                ? "Never Changed"
+                : new Date(changeTimestamp.toNumber() * 1000).toString()
+        );
         setOldGuardian(undefined);
         setNewGuardian(undefined);
     }
@@ -297,13 +328,13 @@ function GuardiansManager({
                     Delay Required between Adding the Guardians: 1 Day
                 </p>
                 <p className="text-lg my-4">
-                    Last Guardian Added on: {lastGuardianAddTime?.toString()}
+                    Last Guardian Added on: {lastGuardianAddTime}
                 </p>
                 <p className="text-lg my-4">
                     Delay Required between Changing the Guardians: 1 Day
                 </p>
                 <p className="text-lg my-4">
-                    Last Guardian Changed on: {"01:01:2023 6:17:00 PM"}
+                    Last Guardian Changed on: {lastGuardianChangeTime}
                 </p>
                 <p className="text-lg my-4">
                     Delay Required between Removing the Guardians: 3 Days

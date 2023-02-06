@@ -5,7 +5,7 @@ import { SiAdguard } from "react-icons/si";
 import Assets from "./Assets";
 import FundsManager from "./FundsManager";
 import OwnershipManager from "./OwnershipManager";
-import GuardianManager from "./GuardianManager";
+import GuardiansManager from "./GuardiansManager";
 import { contractAddresses } from "../constants";
 import { useMoralis } from "react-moralis";
 import { useState } from "react";
@@ -91,7 +91,7 @@ function TabsList(): JSX.Element {
                         </div>
                     }
                 >
-                    <GuardianManager
+                    <GuardiansManager
                         guardianContractAddress={guardianContractAddress!}
                     />
                 </Tab>

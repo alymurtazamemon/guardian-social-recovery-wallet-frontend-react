@@ -8,7 +8,7 @@ interface GuardianManagerPropsTypes {
     guardianContractAddress: string;
 }
 
-function GuardianManager({
+function GuardiansManager({
     guardianContractAddress,
 }: GuardianManagerPropsTypes): JSX.Element {
     const [guardians, setGuardians] = useState<string[]>([]);
@@ -122,4 +122,4 @@ function GuardianManager({
     );
 }
 
-export default GuardianManager;
+export default GuardiansManager;

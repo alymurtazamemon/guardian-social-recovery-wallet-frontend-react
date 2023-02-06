@@ -25,6 +25,7 @@ function GuardiansManager({
     const [guardian, setGuardian] = useState<string>();
     const [oldGuardian, setOldGuardian] = useState<string>();
     const [newGuardian, setNewGuardian] = useState<string>();
+    const [removeGuardian, setRemoveGuardian] = useState<string>();
 
     const { runContractFunction: getGuardians } = useWeb3Contract({
         abi: abi,
@@ -300,6 +301,8 @@ function GuardiansManager({
                     }}
                     width="80%"
                     style={{ marginTop: "64px" }}
+                    value={removeGuardian}
+                    onChange={(event) => setRemoveGuardian(event.target.value)}
                 />
                 <TextButton text="Remove Guardian" />
             </div>

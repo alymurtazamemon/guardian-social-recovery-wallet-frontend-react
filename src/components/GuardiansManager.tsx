@@ -23,6 +23,8 @@ function GuardiansManager({
 
     const [guardians, setGuardians] = useState<string[]>([]);
     const [guardian, setGuardian] = useState<string>();
+    const [oldGuardian, setOldGuardian] = useState<string>();
+    const [newGuardian, setNewGuardian] = useState<string>();
 
     const { runContractFunction: getGuardians } = useWeb3Contract({
         abi: abi,
@@ -201,6 +203,8 @@ function GuardiansManager({
                         }}
                         width="50%"
                         style={{ marginTop: "64px", marginRight: "8px" }}
+                        value={oldGuardian}
+                        onChange={(event) => setOldGuardian(event.target.value)}
                     />
                     <Input
                         label="To"
@@ -212,6 +216,8 @@ function GuardiansManager({
                         }}
                         width="50%"
                         style={{ marginTop: "64px", marginLeft: "8px" }}
+                        value={newGuardian}
+                        onChange={(event) => setNewGuardian(event.target.value)}
                     />
                 </div>
                 <TextButton text="Change Guardian" />

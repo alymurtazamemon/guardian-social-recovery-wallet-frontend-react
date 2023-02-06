@@ -4,6 +4,7 @@ import { abi } from "../constants";
 import { useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
 import { AiFillBell } from "react-icons/ai";
+import { ContractTransaction } from "ethers";
 
 interface GuardianManagerPropsTypes {
     guardianContractAddress: string;
@@ -35,7 +36,7 @@ function GuardiansManager({
         contractAddress: guardianContractAddress,
         functionName: "addGuardian",
         params: {
-            guardian: "",
+            guardian: guardian,
         },
     });
 
@@ -46,7 +47,7 @@ function GuardiansManager({
         })();
     }, []);
 
-    function handleAddGuardianClick() {
+    async function handleAddGuardianClick() {
         if (guardian == undefined) {
             _showNotification(
                 NotificationType.warning,
@@ -54,6 +55,63 @@ function GuardiansManager({
                 "Please input the address of guardian."
             );
             return;
+        }
+
+        await addGuardian({
+            onSuccess: (tx) =>
+                handleAddGuardianOnSuccess(tx as ContractTransaction),
+            onError: _handleAllErrors,
+        });
+    }
+
+    async function handleAddGuardianOnSuccess(tx: ContractTransaction) {
+        await tx.wait(1);
+
+        const guardians = (await getGuardians()) as string[];
+
+        _showNotification(
+            NotificationType.success,
+            "Success",
+            "New Guardian Added!"
+        );
+
+        setGuardians(guardians);
+        setGuardian(undefined);
+    }
+
+    function _handleAllErrors(error: Error) {
+        if (error.message.includes("User denied transaction signature.")) {
+            _showNotification(
+                NotificationType.error,
+                "Permission Denied",
+                "User denied transaction signature."
+            );
+        } else if (error.message.toLowerCase().includes("nonce too high")) {
+            _showNotification(
+                NotificationType.error,
+                "Invalid Nonce",
+                "Reset your Metamask."
+            );
+        } else if (error.message.includes("Ownable: caller is not the owner")) {
+            _showNotification(
+                NotificationType.error,
+                "Access Denied",
+                "The caller is not the owner and does not have permission to perform this action."
+            );
+        } else if (
+            error.message.includes("Error__CanOnlyAddAfterDelayPeriod")
+        ) {
+            _showNotification(
+                NotificationType.error,
+                "Guardian Addition Not Allowed",
+                "You can only add a guardian after the delay period. Please wait until the delay period is over and try again."
+            );
+        } else {
+            _showNotification(
+                NotificationType.error,
+                error.name,
+                error.message
+            );
         }
     }
 

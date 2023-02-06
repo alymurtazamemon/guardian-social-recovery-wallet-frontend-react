@@ -57,6 +57,16 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         },
     });
 
+    const { runContractFunction: sendAll } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "sendAll",
+        params: {
+            to: address,
+            amount: walletBalance,
+        },
+    });
+
     useEffect(() => {
         (async () => {
             const balance = (await getBalance()) as String;
@@ -192,6 +202,38 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         }
     }
 
+    async function handleOnSendAllClick() {
+        if (address == "") {
+            showNotification(
+                NotificationType.warning,
+                "Address Not Found",
+                "Please input the address of receiver."
+            );
+            return;
+        }
+
+        await sendAll({
+            onSuccess: (tx) =>
+                handleSendAllOnSuccess(tx as ContractTransaction),
+            onError: handleSendAllOnError,
+        });
+    }
+
+    async function handleSendAllOnSuccess(tx: ContractTransaction) {
+        await tx.wait(1);
+
+        showNotification(
+            NotificationType.success,
+            "Successs",
+            `${amount} ETH sent to ${address}`
+        );
+
+        setAmount(undefined);
+        setAddress("");
+    }
+
+    function handleSendAllOnError(error: Error) {}
+
     function showNotification(
         type: NotificationType,
         title: string,
@@ -239,9 +281,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 </button>
                 <button
                     className="flex flex-col items-center justify-center mx-4"
-                    onClick={() => {
-                        console.log("Send Clicked!");
-                    }}
+                    onClick={handleOnSendAllClick}
                 >
                     <BsFillArrowUpRightCircleFill color="#0D72C4" size={40} />
                     <h1 className="text-[#0D72C4] m-2">Send All</h1>

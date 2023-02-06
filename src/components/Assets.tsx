@@ -107,21 +107,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
 
                 setAmount(undefined);
             } catch (error: any) {
-                if (
-                    error.message.includes("User denied transaction signature.")
-                ) {
-                    _showNotification(
-                        NotificationType.error,
-                        "Permission Denied",
-                        "User denied transaction signature."
-                    );
-                } else {
-                    _showNotification(
-                        NotificationType.error,
-                        error.name,
-                        error.message
-                    );
-                }
+                _handleAllErrors(error);
             }
         }
     }

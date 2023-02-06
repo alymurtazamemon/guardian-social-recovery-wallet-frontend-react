@@ -42,6 +42,16 @@ function GuardiansManager({
         },
     });
 
+    const { runContractFunction: changeGuardian } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "changeGuardian",
+        params: {
+            from: oldGuardian,
+            to: newGuardian,
+        },
+    });
+
     useEffect(() => {
         (async () => {
             const guardians = (await getGuardians()) as string[];
@@ -81,7 +91,7 @@ function GuardiansManager({
         setGuardian(undefined);
     }
 
-    function handleChangeGuardianOnClick() {
+    async function handleChangeGuardianOnClick() {
         if (oldGuardian == undefined) {
             _showNotification(
                 NotificationType.warning,

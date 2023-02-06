@@ -181,6 +181,8 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 "Transaction Failed",
                 "Your transaction was unsuccessful. Please try again later."
             );
+        } else {
+            showNotification(NotificationType.error, error.name, error.message);
         }
     }
 

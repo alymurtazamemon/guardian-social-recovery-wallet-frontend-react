@@ -1,17 +1,27 @@
-import { Input } from "@web3uikit/core";
+import { Input, useNotification } from "@web3uikit/core";
 import TextButton from "./TextButton";
 import { abi } from "../constants";
 import { useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
+import { AiFillBell } from "react-icons/ai";
 
 interface GuardianManagerPropsTypes {
     guardianContractAddress: string;
 }
 
+enum NotificationType {
+    warning,
+    success,
+    error,
+}
+
 function GuardiansManager({
     guardianContractAddress,
 }: GuardianManagerPropsTypes): JSX.Element {
+    const dispatch = useNotification();
+
     const [guardians, setGuardians] = useState<string[]>([]);
+    const [guardian, setGuardian] = useState<string>();
 
     const { runContractFunction: getGuardians } = useWeb3Contract({
         abi: abi,
@@ -20,12 +30,51 @@ function GuardiansManager({
         params: {},
     });
 
+    const { runContractFunction: addGuardian } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "addGuardian",
+        params: {
+            guardian: "",
+        },
+    });
+
     useEffect(() => {
         (async () => {
             const guardians = (await getGuardians()) as string[];
             setGuardians(guardians);
         })();
     }, []);
+
+    function handleAddGuardianClick() {
+        if (guardian == undefined) {
+            _showNotification(
+                NotificationType.warning,
+                "Address Not Found",
+                "Please input the address of guardian."
+            );
+            return;
+        }
+    }
+
+    function _showNotification(
+        type: NotificationType,
+        title: string,
+        message: string
+    ) {
+        dispatch({
+            type:
+                type == NotificationType.warning
+                    ? "warning"
+                    : type == NotificationType.success
+                    ? "success"
+                    : "error",
+            title: title,
+            message: message,
+            icon: <AiFillBell />,
+            position: "topR",
+        });
+    }
 
     return (
         <div>
@@ -76,9 +125,13 @@ function GuardiansManager({
                         characterMaxLength: 42,
                     }}
                     width="80%"
+                    value={guardian}
+                    onChange={(event) => setGuardian(event.target.value)}
                 />
-                <TextButton text="Add Guardian" />
-
+                <TextButton
+                    text="Add Guardian"
+                    onClick={handleAddGuardianClick}
+                />
                 <div className="flex w-full px-20">
                     <Input
                         label="From"
@@ -104,7 +157,6 @@ function GuardiansManager({
                     />
                 </div>
                 <TextButton text="Change Guardian" />
-
                 <Input
                     label="Remove Guardian"
                     placeholder="Enter existing guardian address"

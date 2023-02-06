@@ -29,6 +29,8 @@ function GuardiansManager({
     const [lastGuardianAddTime, setLastGuardianAddTime] = useState<string>();
     const [lastGuardianChangeTime, setLastGuardianChangeTime] =
         useState<string>();
+    const [lastGuardianRemovalTime, setLastGuardianRemovalTime] =
+        useState<string>();
 
     const { runContractFunction: getGuardians } = useWeb3Contract({
         abi: abi,
@@ -79,6 +81,15 @@ function GuardiansManager({
         params: {},
     });
 
+    const { runContractFunction: getLastGuardianRemovalTime } = useWeb3Contract(
+        {
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "getLastGuardianRemovalTime",
+            params: {},
+        }
+    );
+
     useEffect(() => {
         (async () => {
             const guardians = (await getGuardians()) as string[];
@@ -98,6 +109,14 @@ function GuardiansManager({
                 changeTimestamp.toNumber() == 0
                     ? "Never Changed"
                     : new Date(changeTimestamp.toNumber() * 1000).toString()
+            );
+
+            const removalTimestamp =
+                (await getLastGuardianRemovalTime()) as BigNumber;
+            setLastGuardianRemovalTime(
+                removalTimestamp.toNumber() == 0
+                    ? "Never Removed"
+                    : new Date(removalTimestamp.toNumber() * 1000).toString()
             );
         })();
     }, []);
@@ -210,6 +229,8 @@ function GuardiansManager({
         await tx.wait(1);
 
         const guardians = (await getGuardians()) as string[];
+        const removalTimestamp =
+            (await getLastGuardianRemovalTime()) as BigNumber;
 
         _showNotification(
             NotificationType.success,
@@ -218,6 +239,11 @@ function GuardiansManager({
         );
 
         setGuardians(guardians);
+        setLastGuardianRemovalTime(
+            removalTimestamp.toNumber() == 0
+                ? "Never Removed"
+                : new Date(removalTimestamp.toNumber() * 1000).toString()
+        );
         setRemoveGuardian(undefined);
     }
 
@@ -340,7 +366,7 @@ function GuardiansManager({
                     Delay Required between Removing the Guardians: 3 Days
                 </p>
                 <p className="text-lg my-4">
-                    Last Guardian Removed on: {"01:01:2023 6:17:00 PM"}
+                    Last Guardian Removed on: {lastGuardianRemovalTime}
                 </p>
             </div>
             <div className="flex flex-col justify-czenter items-center mt-8">

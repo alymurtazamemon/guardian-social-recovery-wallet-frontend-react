@@ -255,22 +255,26 @@ function OwnershipManager({
                     {owner.slice(owner.length - 6, owner.length)}
                 </h3>
 
-                <Input
-                    label="New Address"
-                    placeholder="Enter new owner address"
-                    type="text"
-                    validation={{
-                        characterMinLength: 42,
-                        characterMaxLength: 42,
-                    }}
-                    width="80%"
-                    value={address}
-                    onChange={(event) => setAddress(event.target.value)}
-                />
-                <TextButton
-                    text="Request To Update Owner"
-                    onClick={handleUpdateOwnerRequestOnClick}
-                />
+                {!ownerUpdateRequestStatus && (
+                    <Input
+                        label="New Address"
+                        placeholder="Enter new owner address"
+                        type="text"
+                        validation={{
+                            characterMinLength: 42,
+                            characterMaxLength: 42,
+                        }}
+                        width="80%"
+                        value={address}
+                        onChange={(event) => setAddress(event.target.value)}
+                    />
+                )}
+                {!ownerUpdateRequestStatus && (
+                    <TextButton
+                        text="Request To Update Owner"
+                        onClick={handleUpdateOwnerRequestOnClick}
+                    />
+                )}
             </div>
             <div className="mt-8">
                 <h1 className="text-2xl text-black font-extrabold">

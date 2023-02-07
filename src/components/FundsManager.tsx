@@ -28,6 +28,7 @@ function FundsManager({
         dailyTransferLimitUpdateRequestStatus,
         setDailyTransferUpdateRequestStatus,
     ] = useState<boolean>(false);
+    const [limit, setLimit] = useState<number>();
 
     const { runContractFunction: getOwner } = useWeb3Contract({
         abi: abi,
@@ -120,6 +121,10 @@ function FundsManager({
                                 numberMin: 1,
                             }}
                             width="80%"
+                            value={limit}
+                            onChange={(event) =>
+                                setLimit(Number(event.target.value))
+                            }
                         />
                     )}
                 {owner.toLowerCase() == account?.toLowerCase() &&

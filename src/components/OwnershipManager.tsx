@@ -92,6 +92,13 @@ function OwnershipManager({
         params: {},
     });
 
+    const { runContractFunction: confirmUpdateOwnerRequest } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "confirmUpdateOwnerRequest",
+        params: {},
+    });
+
     useEffect(() => {
         (async () => {
             const owner = (await getOwner()) as string;
@@ -155,6 +162,28 @@ function OwnershipManager({
         );
 
         setAddress(undefined);
+    }
+
+    async function handleConfirmOwnerUpdateRequestOnClick() {
+        await confirmUpdateOwnerRequest({
+            onSuccess: (tx) =>
+                handleConfirmOwnerUpdateRequestOnSuccess(
+                    tx as ContractTransaction
+                ),
+            onError: _handleAllErrors,
+        });
+    }
+
+    async function handleConfirmOwnerUpdateRequestOnSuccess(
+        tx: ContractTransaction
+    ) {
+        await tx.wait(1);
+
+        _showNotification(
+            NotificationType.success,
+            "Success",
+            `Your permission is marked as confirmed.`
+        );
     }
 
     function _handleAllErrors(error: Error) {
@@ -324,7 +353,10 @@ function OwnershipManager({
                             })}
                         </ol>
                         <div className="flex flex-col items-center mt-4">
-                            <TextButton text="Confirm Owner Update Request" />
+                            <TextButton
+                                text="Confirm Owner Update Request"
+                                onClick={handleConfirmOwnerUpdateRequestOnClick}
+                            />
                         </div>
                     </div>
                 )}

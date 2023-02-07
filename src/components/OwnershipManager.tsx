@@ -99,6 +99,13 @@ function OwnershipManager({
         params: {},
     });
 
+    const { runContractFunction: getRequiredConfirmations } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "requiredConfirmations",
+        params: {},
+    });
+
     useEffect(() => {
         (async () => {
             const owner = (await getOwner()) as string;

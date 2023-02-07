@@ -5,7 +5,7 @@ import GuardianAndConfirmation from "./GuardianAndConfirmation";
 import { abi } from "../constants";
 import { useMoralis, useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber, ContractTransaction, ethers } from "ethers";
 
 interface FundsManagerPropsTypes {
     guardianContractAddress: string;
@@ -76,6 +76,19 @@ function FundsManager({
             params: {},
         });
 
+    const { runContractFunction: requestToUpdateDailyTransferLimit } =
+        useWeb3Contract({
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "requestToUpdateDailyTransferLimit",
+            params: {
+                limit:
+                    limit == undefined
+                        ? ethers.utils.parseEther("1")
+                        : ethers.utils.parseEther(limit?.toString()),
+            },
+        });
+
     useEffect(() => {
         (async () => {
             const dailyLimit = (await getDailyTransferLimit()) as String;
@@ -95,14 +108,14 @@ function FundsManager({
 
             const requestStatus =
                 (await getDailyTransferLimitUpdateRequestStatus()) as boolean;
-            // setDailyTransferUpdateRequestStatus(requestStatus);
+            setDailyTransferUpdateRequestStatus(requestStatus);
 
             const owner = (await getOwner()) as String;
             setOwner(owner.toString());
         })();
     }, []);
 
-    function handleRequestToUpdateLimitOnClick() {
+    async function handleRequestToUpdateLimitOnClick() {
         if (limit == undefined) {
             _showNotification(
                 NotificationType.warning,
@@ -110,6 +123,65 @@ function FundsManager({
                 "Please input the limit amount in the amount field."
             );
             return;
+        }
+
+        await requestToUpdateDailyTransferLimit({
+            onSuccess: (tx) =>
+                handleUpdateLimitOnSuccess(tx as ContractTransaction),
+            onError: _handleAllErrors,
+        });
+    }
+
+    async function handleUpdateLimitOnSuccess(tx: ContractTransaction) {
+        await tx.wait(1);
+
+        const dailyLimit = (await getDailyTransferLimit()) as String;
+        const dailyLimitInUsd = (await getDailyTransferLimitInUSD()) as String;
+        const requestStatus =
+            (await getDailyTransferLimitUpdateRequestStatus()) as boolean;
+
+        _showNotification(
+            NotificationType.success,
+            "Success",
+            `Daily Transfer Limit Updated to ${limit} ETH.`
+        );
+
+        setDailyTransferLimit(dailyLimit.toString());
+        setDailyTransferLimitInUsd(dailyLimitInUsd.toString());
+        setDailyTransferUpdateRequestStatus(requestStatus);
+    }
+
+    function _handleAllErrors(error: Error) {
+        if (error.message.includes("User denied transaction signature.")) {
+            _showNotification(
+                NotificationType.error,
+                "Permission Denied",
+                "User denied transaction signature."
+            );
+        } else if (error.message.toLowerCase().includes("nonce too high")) {
+            _showNotification(
+                NotificationType.error,
+                "Invalid Nonce",
+                "Reset your Metamask."
+            );
+        } else if (error.message.includes("Ownable: caller is not the owner")) {
+            _showNotification(
+                NotificationType.error,
+                "Access Denied",
+                "The caller is not the owner and does not have permission to perform this action."
+            );
+        } else if (error.message.includes("Error__GuardiansListIsEmpty")) {
+            _showNotification(
+                NotificationType.error,
+                "Empty Guardians List",
+                "The list of guardians is empty. Please add a guardian and try again."
+            );
+        } else {
+            _showNotification(
+                NotificationType.error,
+                error.name,
+                error.message
+            );
         }
     }
 

@@ -74,7 +74,8 @@ function FundsManager({
                     Information
                 </h1>
                 <p className="text-lg my-4">
-                    Current Daily Transfer Limit: {1} ETH
+                    Current Daily Transfer Limit:{" "}
+                    {ethers.utils.formatEther(dailyTransferLimit)} ETH
                 </p>
                 <p className="text-lg my-4">
                     Last Daily Tranfer Update Request Time:{" "}

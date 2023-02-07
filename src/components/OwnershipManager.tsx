@@ -21,6 +21,7 @@ function OwnershipManager({
         useState<boolean>(false);
     const [requiredConfirmations, setRequiredConfirmations] =
         useState<number>();
+    const [confirmationTime, setConfirmationTime] = useState<string>("0");
 
     const { runContractFunction: getOwner } = useWeb3Contract({
         abi: abi,
@@ -51,6 +52,14 @@ function OwnershipManager({
         params: {},
     });
 
+    const { runContractFunction: getOwnerUpdateConfirmationTime } =
+        useWeb3Contract({
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "getOwnerUpdateConfirmationTime",
+            params: {},
+        });
+
     useEffect(() => {
         (async () => {
             const owner = (await getOwner()) as string;
@@ -71,6 +80,16 @@ function OwnershipManager({
             const requiredConfirmations =
                 (await getNoOfConfirmations()) as BigNumber;
             setRequiredConfirmations(requiredConfirmations.toNumber());
+
+            const confirmationTime =
+                (await getOwnerUpdateConfirmationTime()) as BigNumber;
+
+            setConfirmationTime(
+                new Date(
+                    (confirmationTime.toNumber() + requestTime.toNumber()) *
+                        1000
+                ).toString()
+            );
         })();
     }, []);
 
@@ -118,24 +137,28 @@ function OwnershipManager({
                         {ownerUpdateRequestStatus ? "Active" : "Inactive"}
                     </span>
                 </p>
-                <p className="text-lg my-4">
-                    Owner Update Confirmation Time Left:{" "}
-                    {"01:01:2023 6:17:00 PM"}
-                </p>
-                <p className="text-lg my-4">
-                    No of Confirmed Confirmations: {requiredConfirmations}
-                </p>
-                <h2 className="text-xl text-black font-bold my-4">
-                    Confirmed By:
-                </h2>
-                <ol>
-                    {/* <GuardianAndConfirmation />
+                {ownerUpdateRequestStatus && (
+                    <div>
+                        <p className="text-lg my-4">
+                            Confirmation Till: {confirmationTime}
+                        </p>
+                        <p className="text-lg my-4">
+                            No of Confirmed Confirmations:{" "}
+                            {requiredConfirmations}
+                        </p>
+                        <h2 className="text-xl text-black font-bold my-4">
+                            Confirmed By:
+                        </h2>
+                        <ol>
+                            {/* <GuardianAndConfirmation />
                     <GuardianAndConfirmation />
                     <GuardianAndConfirmation /> */}
-                </ol>
-            </div>
-            <div className="flex flex-col items-center mt-4">
-                <TextButton text="Confirm Owner Update Request" />
+                        </ol>
+                        <div className="flex flex-col items-center mt-4">
+                            <TextButton text="Confirm Owner Update Request" />
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

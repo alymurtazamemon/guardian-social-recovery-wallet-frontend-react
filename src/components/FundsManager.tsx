@@ -17,6 +17,10 @@ function FundsManager({
     const [dailyTransferLimit, setDailyTransferLimit] = useState<string>("0");
     const [dailyTransferLimitInUsd, setDailyTransferLimitInUsd] =
         useState<string>("0");
+    const [
+        dailyTransferLimitUpdateRequestTime,
+        setDailyTransferLimitUpdateRequestTime,
+    ] = useState<string>("0");
 
     const { runContractFunction: getDailyTransferLimit } = useWeb3Contract({
         abi: abi,
@@ -34,6 +38,14 @@ function FundsManager({
         }
     );
 
+    const { runContractFunction: getLastDailyTransferUpdateRequestTime } =
+        useWeb3Contract({
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "getLastDailyTransferUpdateRequestTime",
+            params: {},
+        });
+
     useEffect(() => {
         (async () => {
             const dailyLimit = (await getDailyTransferLimit()) as String;
@@ -42,6 +54,14 @@ function FundsManager({
             const dailyLimitInUsd =
                 (await getDailyTransferLimitInUSD()) as String;
             setDailyTransferLimitInUsd(dailyLimitInUsd.toString());
+
+            const requestTime =
+                (await getLastDailyTransferUpdateRequestTime()) as BigNumber;
+            setDailyTransferLimitUpdateRequestTime(
+                requestTime.toNumber() == 0
+                    ? "Never Requested"
+                    : new Date(requestTime.toNumber() * 1000).toString()
+            );
         })();
     }, []);
 
@@ -79,7 +99,7 @@ function FundsManager({
                 </p>
                 <p className="text-lg my-4">
                     Last Daily Tranfer Update Request Time:{" "}
-                    {"01:01:2023 6:17:00 PM"}
+                    {dailyTransferLimitUpdateRequestTime}
                 </p>
                 <p className="text-lg my-4">
                     Current Request Status:{" "}

@@ -131,18 +131,22 @@ function FundsManager({
                             : "Inactive"}
                     </span>
                 </p>
-                <p className="text-lg my-4">
-                    Dialy Tranfer Update Confirmation Time Left:{" "}
-                    {"01:01:2023 6:17:00 PM"}
-                </p>
-                <h2 className="text-xl text-black font-bold my-4">
-                    Confirmed By:
-                </h2>
-                <ol>
-                    <GuardianAndConfirmation />
-                    <GuardianAndConfirmation />
-                    <GuardianAndConfirmation />
-                </ol>
+                {dailyTransferLimitUpdateRequestStatus && (
+                    <p className="text-lg my-4">
+                        Dialy Tranfer Update Confirmation Time Left:{" "}
+                        {"01:01:2023 6:17:00 PM"}
+                    </p>
+                )}
+                <div>
+                    <h2 className="text-xl text-black font-bold my-4">
+                        Confirmed By:
+                    </h2>
+                    <ol>
+                        <GuardianAndConfirmation />
+                        <GuardianAndConfirmation />
+                        <GuardianAndConfirmation />
+                    </ol>
+                </div>
             </div>
             <div className="flex flex-col items-center mt-4">
                 <TextButton text="Confirm Request" />

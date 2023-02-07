@@ -13,13 +13,19 @@ interface GuardianAndConfirmationPropsTypes {
     guardianAddress: string;
     index: number;
     parent: ParentComponent;
+    noOfConfirmations: number;
 }
+
+GuardianAndConfirmation.defaultProps = {
+    noOfConfirmations: 0,
+};
 
 function GuardianAndConfirmation({
     guardianContractAddress,
     guardianAddress,
     index,
     parent,
+    noOfConfirmations,
 }: GuardianAndConfirmationPropsTypes): JSX.Element {
     const [status, setStatus] = useState<boolean>(false);
 
@@ -52,7 +58,7 @@ function GuardianAndConfirmation({
             ) as boolean;
             setStatus(status);
         })();
-    }, []);
+    }, [noOfConfirmations]);
 
     return (
         <div key={index} className="flex items-center mt-4">

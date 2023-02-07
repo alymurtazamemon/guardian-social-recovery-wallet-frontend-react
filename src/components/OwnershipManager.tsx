@@ -34,8 +34,7 @@ function OwnershipManager({
         useState<string>("0");
     const [ownerUpdateRequestStatus, setOwnerUpdateRequestStatus] =
         useState<boolean>(false);
-    const [requiredConfirmations, setRequiredConfirmations] =
-        useState<number>();
+    const [noOfConfirmations, setNoOfConfirmations] = useState<number>();
     const [confirmationTime, setConfirmationTime] = useState<string>("0");
     const [guardians, setGuardians] = useState<string[]>([]);
 
@@ -123,9 +122,9 @@ function OwnershipManager({
                 (await getIsOwnerUpdateRequested()) as boolean;
             setOwnerUpdateRequestStatus(requestStatus);
 
-            const requiredConfirmations =
+            const noOfConfirmations =
                 (await getNoOfConfirmations()) as BigNumber;
-            setRequiredConfirmations(requiredConfirmations.toNumber());
+            setNoOfConfirmations(noOfConfirmations.toNumber());
 
             const confirmationTime =
                 (await getOwnerUpdateConfirmationTime()) as BigNumber;
@@ -162,12 +161,33 @@ function OwnershipManager({
     async function handleUpdateOwnerRequestOnSuccess(tx: ContractTransaction) {
         await tx.wait(1);
 
+        const requestTime =
+            (await getLastOwnerUpdateRequestTime()) as BigNumber;
+        const requestStatus = (await getIsOwnerUpdateRequested()) as boolean;
+        const noOfConfirmations = (await getNoOfConfirmations()) as BigNumber;
+        const confirmationTime =
+            (await getOwnerUpdateConfirmationTime()) as BigNumber;
+        const guardians = (await getGuardians()) as string[];
+
         _showNotification(
             NotificationType.info,
             "Requested",
             `Owner Requested to Update to ${address}.`
         );
 
+        setOwnerUpdateRequestTime(
+            requestTime.toNumber() == 0
+                ? "Never Requested"
+                : new Date(requestTime.toNumber() * 1000).toString()
+        );
+        setOwnerUpdateRequestStatus(requestStatus);
+        setNoOfConfirmations(noOfConfirmations.toNumber());
+        setConfirmationTime(
+            new Date(
+                (confirmationTime.toNumber() + requestTime.toNumber()) * 1000
+            ).toString()
+        );
+        setGuardians(guardians);
         setAddress(undefined);
     }
 
@@ -186,11 +206,36 @@ function OwnershipManager({
     ) {
         await tx.wait(1);
 
-        _showNotification(
-            NotificationType.success,
-            "Success",
-            `Your permission is marked as confirmed.`
-        );
+        const requiredConfirmations =
+            (await getRequiredConfirmations()) as BigNumber;
+
+        if (noOfConfirmations! + 1 >= requiredConfirmations.toNumber()) {
+            const owner = (await getOwner()) as string;
+            const requestStatus =
+                (await getIsOwnerUpdateRequested()) as boolean;
+
+            _showNotification(
+                NotificationType.success,
+                "Success",
+                `Ownership Updated to ${owner}`
+            );
+
+            setOwner(owner);
+            setOwnerUpdateRequestStatus(requestStatus);
+        } else {
+            const noOfConfirmations =
+                (await getNoOfConfirmations()) as BigNumber;
+            const guardians = (await getGuardians()) as string[];
+
+            _showNotification(
+                NotificationType.info,
+                "Success",
+                `Your permission is marked as confirmed.`
+            );
+
+            setGuardians(guardians);
+            setNoOfConfirmations(noOfConfirmations.toNumber());
+        }
     }
 
     function _handleAllErrors(error: Error) {
@@ -337,8 +382,7 @@ function OwnershipManager({
                             Confirmation Till: {confirmationTime}
                         </p>
                         <p className="text-lg my-4">
-                            No of Confirmed Confirmations:{" "}
-                            {requiredConfirmations}
+                            No of Confirmed Confirmations: {noOfConfirmations}
                         </p>
                         <h2 className="text-xl text-black font-bold my-4">
                             Confirmed By:
@@ -347,6 +391,7 @@ function OwnershipManager({
                             {guardians.map((guardian, index) => {
                                 return (
                                     <GuardianAndConfirmation
+                                        noOfConfirmations={noOfConfirmations}
                                         parent={
                                             ParentComponent.OwnershipManager
                                         }

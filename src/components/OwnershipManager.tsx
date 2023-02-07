@@ -105,6 +105,13 @@ function OwnershipManager({
         params: {},
     });
 
+    const { runContractFunction: resetOwnershipVariables } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "resetOwnershipVariables",
+        params: {},
+    });
+
     useEffect(() => {
         (async () => {
             const owner = (await getOwner()) as string;
@@ -236,6 +243,31 @@ function OwnershipManager({
             setGuardians(guardians);
             setNoOfConfirmations(noOfConfirmations.toNumber());
         }
+    }
+
+    async function handleWithdrawExpiredRequest() {
+        await resetOwnershipVariables({
+            onSuccess: (tx) =>
+                handleWithdrawExpiredRequestOnSuccess(
+                    tx as ContractTransaction
+                ),
+            onError: _handleAllErrors,
+        });
+    }
+
+    async function handleWithdrawExpiredRequestOnSuccess(
+        tx: ContractTransaction
+    ) {
+        await tx.wait(1);
+        const requestStatus = (await getIsOwnerUpdateRequested()) as boolean;
+
+        _showNotification(
+            NotificationType.success,
+            "Success",
+            `Expired Request Withdrawn.`
+        );
+
+        setOwnerUpdateRequestStatus(requestStatus);
     }
 
     function _handleAllErrors(error: Error) {
@@ -408,6 +440,10 @@ function OwnershipManager({
                             <TextButton
                                 text="Confirm Owner Update Request"
                                 onClick={handleConfirmOwnerUpdateRequestOnClick}
+                            />
+                            <TextButton
+                                text="Withdraw Expired Request."
+                                onClick={handleWithdrawExpiredRequest}
                             />
                         </div>
                     </div>

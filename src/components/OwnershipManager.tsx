@@ -4,6 +4,7 @@ import GuardianAndConfirmation from "./GuardianAndConfirmation";
 import { abi } from "../constants";
 import { useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
+import { BigNumber } from "ethers";
 
 interface OwnershipManagerPropsTypes {
     guardianContractAddress: string;
@@ -14,6 +15,8 @@ function OwnershipManager({
 }: OwnershipManagerPropsTypes): JSX.Element {
     const [owner, setOwner] = useState<string>("");
     const [address, setAddress] = useState<string>("");
+    const [ownerUpdateRequestTime, setOwnerUpdateRequestTime] =
+        useState<string>("0");
 
     const { runContractFunction: getOwner } = useWeb3Contract({
         abi: abi,
@@ -22,10 +25,26 @@ function OwnershipManager({
         params: {},
     });
 
+    const { runContractFunction: getLastOwnerUpdateRequestTime } =
+        useWeb3Contract({
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "getLastOwnerUpdateRequestTime",
+            params: {},
+        });
+
     useEffect(() => {
         (async () => {
             const owner = (await getOwner()) as string;
             setOwner(owner);
+
+            const requestTime =
+                (await getLastOwnerUpdateRequestTime()) as BigNumber;
+            setOwnerUpdateRequestTime(
+                requestTime.toNumber() == 0
+                    ? "Never Requested"
+                    : new Date(requestTime.toNumber() * 1000).toString()
+            );
         })();
     }, []);
 
@@ -59,7 +78,7 @@ function OwnershipManager({
                     Information
                 </h1>
                 <p className="text-lg my-4">
-                    Last Owner Update Request Time: {"01:01:2023 6:17:00 PM"}
+                    Last Owner Update Request Time: {ownerUpdateRequestTime}
                 </p>
                 <p className="text-lg my-4">
                     Current Request Status:{" "}

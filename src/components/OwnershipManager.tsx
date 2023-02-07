@@ -4,7 +4,7 @@ import GuardianAndConfirmation from "./GuardianAndConfirmation";
 import { abi } from "../constants";
 import { useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
-import { BigNumber } from "ethers";
+import { BigNumber, ContractTransaction } from "ethers";
 import { AiFillBell } from "react-icons/ai";
 
 interface OwnershipManagerPropsTypes {
@@ -70,6 +70,15 @@ function OwnershipManager({
             params: {},
         });
 
+    const { runContractFunction: requestToUpdateOwner } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "requestToUpdateOwner",
+        params: {
+            newOwnerAddress: address,
+        },
+    });
+
     useEffect(() => {
         (async () => {
             const owner = (await getOwner()) as string;
@@ -111,6 +120,90 @@ function OwnershipManager({
                 "Please input the new address in the address field."
             );
             return;
+        }
+
+        await requestToUpdateOwner({
+            onSuccess: (tx) =>
+                handleUpdateOwnerRequestOnSuccess(tx as ContractTransaction),
+            onError: _handleAllErrors,
+        });
+    }
+
+    async function handleUpdateOwnerRequestOnSuccess(tx: ContractTransaction) {
+        await tx.wait(1);
+
+        _showNotification(
+            NotificationType.info,
+            "Requested",
+            `Owner Requested to Update to ${address}.`
+        );
+
+        setAddress(undefined);
+    }
+
+    function _handleAllErrors(error: Error) {
+        if (error.message.includes("User denied transaction signature.")) {
+            _showNotification(
+                NotificationType.error,
+                "Permission Denied",
+                "User denied transaction signature."
+            );
+        } else if (error.message.toLowerCase().includes("nonce too high")) {
+            _showNotification(
+                NotificationType.error,
+                "Invalid Nonce",
+                "Reset your Metamask."
+            );
+        } else if (error.message.includes("Ownable: caller is not the owner")) {
+            _showNotification(
+                NotificationType.error,
+                "Access Denied",
+                "The caller is not the owner and does not have permission to perform this action."
+            );
+        } else if (error.message.includes("Error__GuardiansListIsEmpty")) {
+            _showNotification(
+                NotificationType.error,
+                "Empty Guardians List",
+                "The list of guardians is empty. Please add a guardian and try again."
+            );
+        } else if (error.message.includes("Error__RequestTimeExpired")) {
+            _showNotification(
+                NotificationType.error,
+                "Request Time Expired",
+                "The time for the request has expired. Please submit a new request to continue."
+            );
+        } else if (
+            error.message.includes("Error__AlreadyConfirmedByGuardian")
+        ) {
+            _showNotification(
+                NotificationType.error,
+                "Already Confirmed by Guardian",
+                "The request has already been confirmed by the guardian. No further action is required."
+            );
+        } else if (error.message.includes("Error__UpdateNotRequested")) {
+            _showNotification(
+                NotificationType.error,
+                "Update Not Requested",
+                "No update has been requested. Please submit a request for update and try again."
+            );
+        } else if (error.message.includes("Error__AddressNotFoundAsGuardian")) {
+            _showNotification(
+                NotificationType.error,
+                "Guardian Not Found",
+                "The address provided was not found in the guardians list."
+            );
+        } else if (error.message.includes("Error__AddressAlreadyAnOwner")) {
+            _showNotification(
+                NotificationType.error,
+                "Address Already an Owner",
+                "The provided address is already an owner."
+            );
+        } else {
+            _showNotification(
+                NotificationType.error,
+                error.name,
+                error.message
+            );
         }
     }
 

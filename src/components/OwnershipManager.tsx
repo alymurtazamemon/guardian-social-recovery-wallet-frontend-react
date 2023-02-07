@@ -13,6 +13,7 @@ function OwnershipManager({
     guardianContractAddress,
 }: OwnershipManagerPropsTypes): JSX.Element {
     const [owner, setOwner] = useState<string>("");
+    const [address, setAddress] = useState<string>("");
 
     const { runContractFunction: getOwner } = useWeb3Contract({
         abi: abi,
@@ -48,6 +49,8 @@ function OwnershipManager({
                         characterMaxLength: 42,
                     }}
                     width="80%"
+                    value={address}
+                    onChange={(event) => setAddress(event.target.value)}
                 />
                 <TextButton text="Request To Update Owner" />
             </div>

@@ -3,7 +3,7 @@ import { Input } from "@web3uikit/core";
 import TextButton from "./TextButton";
 import GuardianAndConfirmation from "./GuardianAndConfirmation";
 import { abi } from "../constants";
-import { useWeb3Contract } from "react-moralis";
+import { useMoralis, useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
 import { BigNumber, ethers } from "ethers";
 
@@ -14,6 +14,9 @@ interface FundsManagerPropsTypes {
 function FundsManager({
     guardianContractAddress,
 }: FundsManagerPropsTypes): JSX.Element {
+    const { account } = useMoralis();
+
+    const [owner, setOwner] = useState<string>("");
     const [dailyTransferLimit, setDailyTransferLimit] = useState<string>("0");
     const [dailyTransferLimitInUsd, setDailyTransferLimitInUsd] =
         useState<string>("0");
@@ -24,7 +27,14 @@ function FundsManager({
     const [
         dailyTransferLimitUpdateRequestStatus,
         setDailyTransferUpdateRequestStatus,
-    ] = useState<boolean>();
+    ] = useState<boolean>(false);
+
+    const { runContractFunction: getOwner } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "owner",
+        params: {},
+    });
 
     const { runContractFunction: getDailyTransferLimit } = useWeb3Contract({
         abi: abi,
@@ -77,9 +87,15 @@ function FundsManager({
 
             const requestStatus =
                 (await getDailyTransferLimitUpdateRequestStatus()) as boolean;
-            setDailyTransferUpdateRequestStatus(requestStatus);
+            // setDailyTransferUpdateRequestStatus(requestStatus);
+
+            const owner = (await getOwner()) as String;
+            setOwner(owner.toString());
         })();
     }, []);
+
+    console.log(account);
+    console.log(owner);
 
     return (
         <div>
@@ -94,16 +110,22 @@ function FundsManager({
                     ${ethers.utils.formatEther(dailyTransferLimitInUsd)} USD
                 </h3>
 
-                <Input
-                    label="Amount"
-                    placeholder="Enter Daily Limit Amount"
-                    type="number"
-                    validation={{
-                        numberMin: 1,
-                    }}
-                    width="80%"
-                />
-                <TextButton text="Request To Update Limit" />
+                {owner.toLowerCase() == account?.toLowerCase() &&
+                    !dailyTransferLimitUpdateRequestStatus && (
+                        <Input
+                            label="Amount"
+                            placeholder="Enter Daily Limit Amount"
+                            type="number"
+                            validation={{
+                                numberMin: 1,
+                            }}
+                            width="80%"
+                        />
+                    )}
+                {owner.toLowerCase() == account?.toLowerCase() &&
+                    !dailyTransferLimitUpdateRequestStatus && (
+                        <TextButton text="Request To Update Limit" />
+                    )}
             </div>
             <div className="mt-8">
                 <h1 className="text-2xl text-black font-extrabold">
@@ -114,7 +136,7 @@ function FundsManager({
                     {ethers.utils.formatEther(dailyTransferLimit)} ETH
                 </p>
                 <p className="text-lg my-4">
-                    Last Daily Tranfer Update Request Time:{" "}
+                    Last Daily Transfer Update Request Time:{" "}
                     {dailyTransferLimitUpdateRequestTime}
                 </p>
                 <p className="text-lg my-4">
@@ -132,25 +154,33 @@ function FundsManager({
                     </span>
                 </p>
                 {dailyTransferLimitUpdateRequestStatus && (
-                    <p className="text-lg my-4">
-                        Dialy Tranfer Update Confirmation Time Left:{" "}
-                        {"01:01:2023 6:17:00 PM"}
-                    </p>
+                    <div>
+                        <p className="text-lg my-4">
+                            Dialy Transfer Update Confirmation Time Left:{" "}
+                            {"01:01:2023 6:17:00 PM"}
+                        </p>
+                        {owner.toLowerCase() == account?.toLowerCase() && (
+                            <div>
+                                <h2 className="text-xl text-black font-bold my-4">
+                                    Confirmed By:
+                                </h2>
+                                <ol>
+                                    <GuardianAndConfirmation />
+                                    <GuardianAndConfirmation />
+                                    <GuardianAndConfirmation />
+                                </ol>
+                            </div>
+                        )}
+                        <div className="flex flex-col items-center mt-4">
+                            {owner.toLowerCase() != account?.toLowerCase() && (
+                                <TextButton text="Confirm Request" />
+                            )}
+                            {owner.toLowerCase() == account?.toLowerCase() && (
+                                <TextButton text="Confirm And Update Daily Transfer Limit" />
+                            )}
+                        </div>
+                    </div>
                 )}
-                <div>
-                    <h2 className="text-xl text-black font-bold my-4">
-                        Confirmed By:
-                    </h2>
-                    <ol>
-                        <GuardianAndConfirmation />
-                        <GuardianAndConfirmation />
-                        <GuardianAndConfirmation />
-                    </ol>
-                </div>
-            </div>
-            <div className="flex flex-col items-center mt-4">
-                <TextButton text="Confirm Request" />
-                <TextButton text="Confirm And Update Daily Transfer Limit" />
             </div>
         </div>
     );

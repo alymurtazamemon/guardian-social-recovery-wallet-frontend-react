@@ -21,6 +21,10 @@ function FundsManager({
         dailyTransferLimitUpdateRequestTime,
         setDailyTransferLimitUpdateRequestTime,
     ] = useState<string>("0");
+    const [
+        dailyTransferLimitUpdateRequestStatus,
+        setDailyTransferUpdateRequestStatus,
+    ] = useState<boolean>();
 
     const { runContractFunction: getDailyTransferLimit } = useWeb3Contract({
         abi: abi,
@@ -46,6 +50,14 @@ function FundsManager({
             params: {},
         });
 
+    const { runContractFunction: getDailyTransferLimitUpdateRequestStatus } =
+        useWeb3Contract({
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "getDailyTransferLimitUpdateRequestStatus",
+            params: {},
+        });
+
     useEffect(() => {
         (async () => {
             const dailyLimit = (await getDailyTransferLimit()) as String;
@@ -62,6 +74,10 @@ function FundsManager({
                     ? "Never Requested"
                     : new Date(requestTime.toNumber() * 1000).toString()
             );
+
+            const requestStatus =
+                (await getDailyTransferLimitUpdateRequestStatus()) as boolean;
+            setDailyTransferUpdateRequestStatus(requestStatus);
         })();
     }, []);
 
@@ -103,7 +119,17 @@ function FundsManager({
                 </p>
                 <p className="text-lg my-4">
                     Current Request Status:{" "}
-                    <span className="text-[#008001] font-bold">Inactive</span>
+                    <span
+                        className={`${
+                            dailyTransferLimitUpdateRequestStatus
+                                ? "text-[#008001]"
+                                : "text-[#0D72C4]"
+                        } font-bold`}
+                    >
+                        {dailyTransferLimitUpdateRequestStatus
+                            ? "Active"
+                            : "Inactive"}
+                    </span>
                 </p>
                 <p className="text-lg my-4">
                     Dialy Tranfer Update Confirmation Time Left:{" "}

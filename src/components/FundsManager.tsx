@@ -122,6 +122,14 @@ function FundsManager({
         params: {},
     });
 
+    const { runContractFunction: resetDailyTransferLimitVariables } =
+        useWeb3Contract({
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "resetDailyTransferLimitVariables",
+            params: {},
+        });
+
     useEffect(() => {
         (async () => {
             const dailyLimit = (await getDailyTransferLimit()) as String;
@@ -256,6 +264,29 @@ function FundsManager({
 
         setDailyTransferLimit(dailyLimit.toString());
         setDailyTransferLimitInUsd(dailyLimitInUsd.toString());
+        setDailyTransferUpdateRequestStatus(requestStatus);
+    }
+
+    async function handleWithdrawMyRequest() {
+        await resetDailyTransferLimitVariables({
+            onSuccess: (tx) =>
+                handleWithdrawMyRequestOnSuccess(tx as ContractTransaction),
+            onError: _handleAllErrors,
+        });
+    }
+
+    async function handleWithdrawMyRequestOnSuccess(tx: ContractTransaction) {
+        await tx.wait(1);
+
+        const requestStatus =
+            (await getDailyTransferLimitUpdateRequestStatus()) as boolean;
+
+        _showNotification(
+            NotificationType.success,
+            "Success",
+            `Your Request is Withdrawn.`
+        );
+
         setDailyTransferUpdateRequestStatus(requestStatus);
     }
 
@@ -453,6 +484,12 @@ function FundsManager({
                                 <TextButton
                                     text="Confirm And Update Daily Transfer Limit"
                                     onClick={handleConfirmAndUpdateOnClick}
+                                />
+                            )}
+                            {owner.toLowerCase() == account?.toLowerCase() && (
+                                <TextButton
+                                    text="Withdraw My Request"
+                                    onClick={handleWithdrawMyRequest}
                                 />
                             )}
                         </div>

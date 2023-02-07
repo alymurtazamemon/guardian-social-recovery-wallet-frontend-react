@@ -17,6 +17,8 @@ function OwnershipManager({
     const [address, setAddress] = useState<string>("");
     const [ownerUpdateRequestTime, setOwnerUpdateRequestTime] =
         useState<string>("0");
+    const [ownerUpdateRequestStatus, setOwnerUpdateRequestStatus] =
+        useState<boolean>(false);
 
     const { runContractFunction: getOwner } = useWeb3Contract({
         abi: abi,
@@ -33,6 +35,13 @@ function OwnershipManager({
             params: {},
         });
 
+    const { runContractFunction: getIsOwnerUpdateRequested } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "getIsOwnerUpdateRequested",
+        params: {},
+    });
+
     useEffect(() => {
         (async () => {
             const owner = (await getOwner()) as string;
@@ -45,6 +54,10 @@ function OwnershipManager({
                     ? "Never Requested"
                     : new Date(requestTime.toNumber() * 1000).toString()
             );
+
+            const requestStatus =
+                (await getIsOwnerUpdateRequested()) as boolean;
+            setOwnerUpdateRequestStatus(requestStatus);
         })();
     }, []);
 
@@ -82,7 +95,15 @@ function OwnershipManager({
                 </p>
                 <p className="text-lg my-4">
                     Current Request Status:{" "}
-                    <span className="text-[#008001] font-bold">Inactive</span>
+                    <span
+                        className={`${
+                            ownerUpdateRequestStatus
+                                ? "text-[#008001]"
+                                : "text-[#0D72C4]"
+                        } font-bold`}
+                    >
+                        {ownerUpdateRequestStatus ? "Active" : "Inactive"}
+                    </span>
                 </p>
                 <p className="text-lg my-4">
                     Owner Update Confirmation Time Left:{" "}

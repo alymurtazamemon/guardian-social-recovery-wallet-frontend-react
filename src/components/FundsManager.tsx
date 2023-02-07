@@ -99,6 +99,14 @@ function FundsManager({
             },
         });
 
+    const { runContractFunction: confirmDailyTransferLimitRequest } =
+        useWeb3Contract({
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "confirmDailyTransferLimitRequest",
+            params: {},
+        });
+
     useEffect(() => {
         (async () => {
             const dailyLimit = (await getDailyTransferLimit()) as String;
@@ -182,6 +190,24 @@ function FundsManager({
             new Date(
                 (confirmationTime.toNumber() + requestTime.toNumber()) * 1000
             ).toString()
+        );
+    }
+
+    async function handleConfirmRequestOnClick() {
+        await confirmDailyTransferLimitRequest({
+            onSuccess: (tx) =>
+                handleConfirmRequestOnSuccess(tx as ContractTransaction),
+            onError: _handleAllErrors,
+        });
+    }
+
+    async function handleConfirmRequestOnSuccess(tx: ContractTransaction) {
+        await tx.wait(1);
+
+        _showNotification(
+            NotificationType.info,
+            "Success",
+            `Your permission is marked as confirmed.`
         );
     }
 
@@ -328,7 +354,10 @@ function FundsManager({
                         )}
                         <div className="flex flex-col items-center mt-4">
                             {owner.toLowerCase() != account?.toLowerCase() && (
-                                <TextButton text="Confirm Request" />
+                                <TextButton
+                                    text="Confirm Request"
+                                    onClick={handleConfirmRequestOnClick}
+                                />
                             )}
                             {owner.toLowerCase() == account?.toLowerCase() && (
                                 <TextButton text="Confirm And Update Daily Transfer Limit" />

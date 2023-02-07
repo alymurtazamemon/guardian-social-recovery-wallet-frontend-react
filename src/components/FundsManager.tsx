@@ -37,6 +37,7 @@ function FundsManager({
         setDailyTransferUpdateRequestStatus,
     ] = useState<boolean>(false);
     const [limit, setLimit] = useState<number>();
+    const [confirmationTime, setConfirmationTime] = useState<string>("0");
 
     const { runContractFunction: getOwner } = useWeb3Contract({
         abi: abi,
@@ -66,6 +67,14 @@ function FundsManager({
             abi: abi,
             contractAddress: guardianContractAddress,
             functionName: "getLastDailyTransferUpdateRequestTime",
+            params: {},
+        });
+
+    const { runContractFunction: getDailyTransferLimitUpdateConfirmationTime } =
+        useWeb3Contract({
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "getDailyTransferLimitUpdateConfirmationTime",
             params: {},
         });
 
@@ -113,6 +122,16 @@ function FundsManager({
 
             const owner = (await getOwner()) as String;
             setOwner(owner.toString());
+
+            const confirmationTime =
+                (await getDailyTransferLimitUpdateConfirmationTime()) as BigNumber;
+
+            setConfirmationTime(
+                new Date(
+                    (confirmationTime.toNumber() + requestTime.toNumber()) *
+                        1000
+                ).toString()
+            );
         })();
     }, []);
 
@@ -142,6 +161,8 @@ function FundsManager({
             (await getDailyTransferLimitUpdateRequestStatus()) as boolean;
         const requestTime =
             (await getLastDailyTransferUpdateRequestTime()) as BigNumber;
+        const confirmationTime =
+            (await getDailyTransferLimitUpdateConfirmationTime()) as BigNumber;
 
         _showNotification(
             NotificationType.info,
@@ -156,6 +177,11 @@ function FundsManager({
             requestTime.toNumber() == 0
                 ? "Never Requested"
                 : new Date(requestTime.toNumber() * 1000).toString()
+        );
+        setConfirmationTime(
+            new Date(
+                (confirmationTime.toNumber() + requestTime.toNumber()) * 1000
+            ).toString()
         );
     }
 
@@ -280,8 +306,7 @@ function FundsManager({
                 {dailyTransferLimitUpdateRequestStatus && (
                     <div>
                         <p className="text-lg my-4">
-                            Dialy Transfer Update Confirmation Time Left:{" "}
-                            {"01:01:2023 6:17:00 PM"}
+                            Confirmation Till: {confirmationTime}
                         </p>
                         {owner.toLowerCase() == account?.toLowerCase() && (
                             <div>

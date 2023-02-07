@@ -15,6 +15,7 @@ enum NotificationType {
     warning,
     success,
     error,
+    info,
 }
 
 function FundsManager({
@@ -139,16 +140,23 @@ function FundsManager({
         const dailyLimitInUsd = (await getDailyTransferLimitInUSD()) as String;
         const requestStatus =
             (await getDailyTransferLimitUpdateRequestStatus()) as boolean;
+        const requestTime =
+            (await getLastDailyTransferUpdateRequestTime()) as BigNumber;
 
         _showNotification(
-            NotificationType.success,
-            "Success",
-            `Daily Transfer Limit Updated to ${limit} ETH.`
+            NotificationType.info,
+            "Requested",
+            `Daily Transfer Limit Requested to Update to ${limit} ETH.`
         );
 
         setDailyTransferLimit(dailyLimit.toString());
         setDailyTransferLimitInUsd(dailyLimitInUsd.toString());
         setDailyTransferUpdateRequestStatus(requestStatus);
+        setDailyTransferLimitUpdateRequestTime(
+            requestTime.toNumber() == 0
+                ? "Never Requested"
+                : new Date(requestTime.toNumber() * 1000).toString()
+        );
     }
 
     function _handleAllErrors(error: Error) {
@@ -196,6 +204,8 @@ function FundsManager({
                     ? "warning"
                     : type == NotificationType.success
                     ? "success"
+                    : type == NotificationType.info
+                    ? "info"
                     : "error",
             title: title,
             message: message,

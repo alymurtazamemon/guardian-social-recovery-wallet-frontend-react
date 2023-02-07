@@ -18,6 +18,11 @@ enum NotificationType {
     info,
 }
 
+enum ParentComponent {
+    OwnershipManager,
+    FundsManager,
+}
+
 function OwnershipManager({
     guardianContractAddress,
 }: OwnershipManagerPropsTypes): JSX.Element {
@@ -32,6 +37,7 @@ function OwnershipManager({
     const [requiredConfirmations, setRequiredConfirmations] =
         useState<number>();
     const [confirmationTime, setConfirmationTime] = useState<string>("0");
+    const [guardians, setGuardians] = useState<string[]>([]);
 
     const { runContractFunction: getOwner } = useWeb3Contract({
         abi: abi,
@@ -79,6 +85,13 @@ function OwnershipManager({
         },
     });
 
+    const { runContractFunction: getGuardians } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "getGuardians",
+        params: {},
+    });
+
     useEffect(() => {
         (async () => {
             const owner = (await getOwner()) as string;
@@ -109,6 +122,9 @@ function OwnershipManager({
                         1000
                 ).toString()
             );
+
+            const guardians = (await getGuardians()) as string[];
+            setGuardians(guardians);
         })();
     }, []);
 
@@ -288,9 +304,20 @@ function OwnershipManager({
                             Confirmed By:
                         </h2>
                         <ol>
-                            {/* <GuardianAndConfirmation />
-                    <GuardianAndConfirmation />
-                    <GuardianAndConfirmation /> */}
+                            {guardians.map((guardian, index) => {
+                                return (
+                                    <GuardianAndConfirmation
+                                        parent={
+                                            ParentComponent.OwnershipManager
+                                        }
+                                        index={index}
+                                        guardianContractAddress={
+                                            guardianContractAddress
+                                        }
+                                        guardianAddress={guardian}
+                                    />
+                                );
+                            })}
                         </ol>
                         <div className="flex flex-col items-center mt-4">
                             <TextButton text="Confirm Owner Update Request" />

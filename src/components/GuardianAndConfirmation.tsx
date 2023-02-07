@@ -3,16 +3,23 @@ import { abi } from "../constants";
 import { useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
 
+enum ParentComponent {
+    OwnershipManager,
+    FundsManager,
+}
+
 interface GuardianAndConfirmationPropsTypes {
     guardianContractAddress: string;
     guardianAddress: string;
     index: number;
+    parent: ParentComponent;
 }
 
 function GuardianAndConfirmation({
     guardianContractAddress,
     guardianAddress,
     index,
+    parent,
 }: GuardianAndConfirmationPropsTypes): JSX.Element {
     const [status, setStatus] = useState<boolean>(false);
 
@@ -26,9 +33,23 @@ function GuardianAndConfirmation({
             },
         });
 
+    const { runContractFunction: getIsOwnershipConfimedByGuardian } =
+        useWeb3Contract({
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "getIsOwnershipConfimedByGuardian",
+            params: {
+                guardian: guardianAddress,
+            },
+        });
+
     useEffect(() => {
         (async () => {
-            const status = (await getGuardianConfirmationStatus()) as boolean;
+            const status = (
+                parent == ParentComponent.FundsManager
+                    ? await getGuardianConfirmationStatus()
+                    : await getIsOwnershipConfimedByGuardian()
+            ) as boolean;
             setStatus(status);
         })();
     }, []);

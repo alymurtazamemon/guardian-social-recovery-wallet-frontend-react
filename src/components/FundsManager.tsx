@@ -18,6 +18,11 @@ enum NotificationType {
     info,
 }
 
+enum ParentComponent {
+    OwnershipManager,
+    FundsManager,
+}
+
 function FundsManager({
     guardianContractAddress,
 }: FundsManagerPropsTypes): JSX.Element {
@@ -462,6 +467,9 @@ function FundsManager({
                                     {guardians.map((guardian, index) => {
                                         return (
                                             <GuardianAndConfirmation
+                                                parent={
+                                                    ParentComponent.FundsManager
+                                                }
                                                 index={index}
                                                 guardianContractAddress={
                                                     guardianContractAddress

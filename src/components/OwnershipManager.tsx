@@ -19,6 +19,8 @@ function OwnershipManager({
         useState<string>("0");
     const [ownerUpdateRequestStatus, setOwnerUpdateRequestStatus] =
         useState<boolean>(false);
+    const [requiredConfirmations, setRequiredConfirmations] =
+        useState<number>();
 
     const { runContractFunction: getOwner } = useWeb3Contract({
         abi: abi,
@@ -42,6 +44,13 @@ function OwnershipManager({
         params: {},
     });
 
+    const { runContractFunction: getNoOfConfirmations } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "getNoOfConfirmations",
+        params: {},
+    });
+
     useEffect(() => {
         (async () => {
             const owner = (await getOwner()) as string;
@@ -58,6 +67,10 @@ function OwnershipManager({
             const requestStatus =
                 (await getIsOwnerUpdateRequested()) as boolean;
             setOwnerUpdateRequestStatus(requestStatus);
+
+            const requiredConfirmations =
+                (await getNoOfConfirmations()) as BigNumber;
+            setRequiredConfirmations(requiredConfirmations.toNumber());
         })();
     }, []);
 
@@ -110,7 +123,7 @@ function OwnershipManager({
                     {"01:01:2023 6:17:00 PM"}
                 </p>
                 <p className="text-lg my-4">
-                    No of Confirmed Confirmations: {3}
+                    No of Confirmed Confirmations: {requiredConfirmations}
                 </p>
                 <h2 className="text-xl text-black font-bold my-4">
                     Confirmed By:

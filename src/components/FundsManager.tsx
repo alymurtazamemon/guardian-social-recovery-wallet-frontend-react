@@ -209,6 +209,7 @@ function FundsManager({
                 (confirmationTime.toNumber() + requestTime.toNumber()) * 1000
             ).toString()
         );
+        setLimit(undefined);
     }
 
     async function handleConfirmRequestOnClick() {
@@ -248,7 +249,9 @@ function FundsManager({
         _showNotification(
             NotificationType.success,
             "Success",
-            `Daily limit Updated to ${ethers.utils.formatEther(dailyLimit)} ETH`
+            `Daily limit Updated to ${ethers.utils.formatEther(
+                dailyLimit.toString()
+            )} ETH`
         );
 
         setDailyTransferLimit(dailyLimit.toString());
@@ -286,6 +289,40 @@ function FundsManager({
                 NotificationType.error,
                 "Invalid Limit",
                 "The limit entered is not valid. Please check and enter a valid limit."
+            );
+        } else if (error.message.includes("Error__RequestTimeExpired")) {
+            _showNotification(
+                NotificationType.error,
+                "Request Time Expired",
+                "The time for the request has expired. Please submit a new request to continue."
+            );
+        } else if (
+            error.message.includes("Error__RequiredConfirmationsNotMet")
+        ) {
+            _showNotification(
+                NotificationType.error,
+                "Confirmations Not Met",
+                "The required number of confirmations have not been met. Please try again later."
+            );
+        } else if (
+            error.message.includes("Error__AlreadyConfirmedByGuardian")
+        ) {
+            _showNotification(
+                NotificationType.error,
+                "Already Confirmed by Guardian",
+                "The request has already been confirmed by the guardian. No further action is required."
+            );
+        } else if (error.message.includes("Error__UpdateNotRequestedByOwner")) {
+            _showNotification(
+                NotificationType.error,
+                "Update Not Requested By Owner",
+                "The update can only be requested by the owner."
+            );
+        } else if (error.message.includes("Error__AddressNotFoundAsGuardian")) {
+            _showNotification(
+                NotificationType.error,
+                "Guardian Not Found",
+                "The address provided was not found in the guardians list."
             );
         } else {
             _showNotification(

@@ -38,6 +38,7 @@ function FundsManager({
     ] = useState<boolean>(false);
     const [limit, setLimit] = useState<number>();
     const [confirmationTime, setConfirmationTime] = useState<string>("0");
+    const [guardians, setGuardians] = useState<string[]>([]);
 
     const { runContractFunction: getOwner } = useWeb3Contract({
         abi: abi,
@@ -107,6 +108,13 @@ function FundsManager({
             params: {},
         });
 
+    const { runContractFunction: getGuardians } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "getGuardians",
+        params: {},
+    });
+
     useEffect(() => {
         (async () => {
             const dailyLimit = (await getDailyTransferLimit()) as String;
@@ -140,6 +148,9 @@ function FundsManager({
                         1000
                 ).toString()
             );
+
+            const guardians = (await getGuardians()) as string[];
+            setGuardians(guardians);
         })();
     }, []);
 
@@ -346,9 +357,17 @@ function FundsManager({
                                     Confirmed By:
                                 </h2>
                                 <ol>
-                                    <GuardianAndConfirmation />
-                                    <GuardianAndConfirmation />
-                                    <GuardianAndConfirmation />
+                                    {guardians.map((guardian, index) => {
+                                        return (
+                                            <GuardianAndConfirmation
+                                                index={index}
+                                                guardianContractAddress={
+                                                    guardianContractAddress
+                                                }
+                                                guardianAddress={guardian}
+                                            />
+                                        );
+                                    })}
                                 </ol>
                             </div>
                         )}

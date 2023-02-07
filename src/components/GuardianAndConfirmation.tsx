@@ -1,12 +1,44 @@
 import { AiFillCheckCircle } from "react-icons/ai";
+import { abi } from "../constants";
+import { useWeb3Contract } from "react-moralis";
+import { useEffect, useState } from "react";
 
-function GuardianAndConfirmation(): JSX.Element {
+interface GuardianAndConfirmationPropsTypes {
+    guardianContractAddress: string;
+    guardianAddress: string;
+    index: number;
+}
+
+function GuardianAndConfirmation({
+    guardianContractAddress,
+    guardianAddress,
+    index,
+}: GuardianAndConfirmationPropsTypes): JSX.Element {
+    const [status, setStatus] = useState<boolean>(false);
+
+    const { runContractFunction: getGuardianConfirmationStatus } =
+        useWeb3Contract({
+            abi: abi,
+            contractAddress: guardianContractAddress,
+            functionName: "getGuardianConfirmationStatus",
+            params: {
+                guardian: guardianAddress,
+            },
+        });
+
+    useEffect(() => {
+        (async () => {
+            const status = (await getGuardianConfirmationStatus()) as boolean;
+            setStatus(status);
+        })();
+    }, []);
+
     return (
-        <div className="flex items-center mt-4">
+        <div key={index} className="flex items-center mt-4">
             <li className="mr-4">
-                1. 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+                {index + 1}. {guardianAddress}
             </li>
-            <AiFillCheckCircle color="green" size={30} />
+            {status && <AiFillCheckCircle color="green" size={30} />}
         </div>
     );
 }

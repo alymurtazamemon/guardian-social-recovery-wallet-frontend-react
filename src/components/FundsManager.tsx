@@ -115,6 +115,13 @@ function FundsManager({
         params: {},
     });
 
+    const { runContractFunction: confirmAndUpdate } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "confirmAndUpdate",
+        params: {},
+    });
+
     useEffect(() => {
         (async () => {
             const dailyLimit = (await getDailyTransferLimit()) as String;
@@ -220,6 +227,33 @@ function FundsManager({
             "Success",
             `Your permission is marked as confirmed.`
         );
+    }
+
+    async function handleConfirmAndUpdateOnClick() {
+        await confirmAndUpdate({
+            onSuccess: (tx) =>
+                handleConfirmAndUpdateOnSuccess(tx as ContractTransaction),
+            onError: _handleAllErrors,
+        });
+    }
+
+    async function handleConfirmAndUpdateOnSuccess(tx: ContractTransaction) {
+        await tx.wait(1);
+
+        const dailyLimit = (await getDailyTransferLimit()) as String;
+        const dailyLimitInUsd = (await getDailyTransferLimitInUSD()) as String;
+        const requestStatus =
+            (await getDailyTransferLimitUpdateRequestStatus()) as boolean;
+
+        _showNotification(
+            NotificationType.success,
+            "Success",
+            `Daily limit Updated to ${ethers.utils.formatEther(dailyLimit)} ETH`
+        );
+
+        setDailyTransferLimit(dailyLimit.toString());
+        setDailyTransferLimitInUsd(dailyLimitInUsd.toString());
+        setDailyTransferUpdateRequestStatus(requestStatus);
     }
 
     function _handleAllErrors(error: Error) {
@@ -379,7 +413,10 @@ function FundsManager({
                                 />
                             )}
                             {owner.toLowerCase() == account?.toLowerCase() && (
-                                <TextButton text="Confirm And Update Daily Transfer Limit" />
+                                <TextButton
+                                    text="Confirm And Update Daily Transfer Limit"
+                                    onClick={handleConfirmAndUpdateOnClick}
+                                />
                             )}
                         </div>
                     </div>

@@ -1,20 +1,30 @@
-import { Input } from "@web3uikit/core";
+import { Input, useNotification } from "@web3uikit/core";
 import TextButton from "./TextButton";
 import GuardianAndConfirmation from "./GuardianAndConfirmation";
 import { abi } from "../constants";
 import { useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
 import { BigNumber } from "ethers";
+import { AiFillBell } from "react-icons/ai";
 
 interface OwnershipManagerPropsTypes {
     guardianContractAddress: string;
 }
 
+enum NotificationType {
+    warning,
+    success,
+    error,
+    info,
+}
+
 function OwnershipManager({
     guardianContractAddress,
 }: OwnershipManagerPropsTypes): JSX.Element {
+    const dispatch = useNotification();
+
     const [owner, setOwner] = useState<string>("");
-    const [address, setAddress] = useState<string>("");
+    const [address, setAddress] = useState<string>();
     const [ownerUpdateRequestTime, setOwnerUpdateRequestTime] =
         useState<string>("0");
     const [ownerUpdateRequestStatus, setOwnerUpdateRequestStatus] =
@@ -93,6 +103,38 @@ function OwnershipManager({
         })();
     }, []);
 
+    async function handleUpdateOwnerRequestOnClick() {
+        if (address == undefined) {
+            _showNotification(
+                NotificationType.warning,
+                "Amount Not Found",
+                "Please input the new address in the address field."
+            );
+            return;
+        }
+    }
+
+    function _showNotification(
+        type: NotificationType,
+        title: string,
+        message: string
+    ) {
+        dispatch({
+            type:
+                type == NotificationType.warning
+                    ? "warning"
+                    : type == NotificationType.success
+                    ? "success"
+                    : type == NotificationType.info
+                    ? "info"
+                    : "error",
+            title: title,
+            message: message,
+            icon: <AiFillBell />,
+            position: "topR",
+        });
+    }
+
     return (
         <div>
             <div className="flex flex-col justify-czenter items-center mt-8">
@@ -116,7 +158,10 @@ function OwnershipManager({
                     value={address}
                     onChange={(event) => setAddress(event.target.value)}
                 />
-                <TextButton text="Request To Update Owner" />
+                <TextButton
+                    text="Request To Update Owner"
+                    onClick={handleUpdateOwnerRequestOnClick}
+                />
             </div>
             <div className="mt-8">
                 <h1 className="text-2xl text-black font-extrabold">

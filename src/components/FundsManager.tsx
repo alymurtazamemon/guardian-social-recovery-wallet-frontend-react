@@ -1,5 +1,5 @@
-import { AiFillCheckCircle } from "react-icons/ai";
-import { Input } from "@web3uikit/core";
+import { AiFillBell, AiFillCheckCircle } from "react-icons/ai";
+import { Input, useNotification } from "@web3uikit/core";
 import TextButton from "./TextButton";
 import GuardianAndConfirmation from "./GuardianAndConfirmation";
 import { abi } from "../constants";
@@ -11,11 +11,18 @@ interface FundsManagerPropsTypes {
     guardianContractAddress: string;
 }
 
+enum NotificationType {
+    warning,
+    success,
+    error,
+}
+
 function FundsManager({
     guardianContractAddress,
 }: FundsManagerPropsTypes): JSX.Element {
-    const { account } = useMoralis();
+    const dispatch = useNotification();
 
+    const { account } = useMoralis();
     const [owner, setOwner] = useState<string>("");
     const [dailyTransferLimit, setDailyTransferLimit] = useState<string>("0");
     const [dailyTransferLimitInUsd, setDailyTransferLimitInUsd] =
@@ -95,8 +102,35 @@ function FundsManager({
         })();
     }, []);
 
-    console.log(account);
-    console.log(owner);
+    function handleRequestToUpdateLimitOnClick() {
+        if (limit == undefined) {
+            _showNotification(
+                NotificationType.warning,
+                "Amount Not Found",
+                "Please input the limit amount in the amount field."
+            );
+            return;
+        }
+    }
+
+    function _showNotification(
+        type: NotificationType,
+        title: string,
+        message: string
+    ) {
+        dispatch({
+            type:
+                type == NotificationType.warning
+                    ? "warning"
+                    : type == NotificationType.success
+                    ? "success"
+                    : "error",
+            title: title,
+            message: message,
+            icon: <AiFillBell />,
+            position: "topR",
+        });
+    }
 
     return (
         <div>
@@ -129,7 +163,10 @@ function FundsManager({
                     )}
                 {owner.toLowerCase() == account?.toLowerCase() &&
                     !dailyTransferLimitUpdateRequestStatus && (
-                        <TextButton text="Request To Update Limit" />
+                        <TextButton
+                            text="Request To Update Limit"
+                            onClick={handleRequestToUpdateLimitOnClick}
+                        />
                     )}
             </div>
             <div className="mt-8">

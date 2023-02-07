@@ -1,8 +1,33 @@
 import { Input } from "@web3uikit/core";
 import TextButton from "./TextButton";
 import GuardianAndConfirmation from "./GuardianAndConfirmation";
+import { abi } from "../constants";
+import { useWeb3Contract } from "react-moralis";
+import { useEffect, useState } from "react";
 
-function OwnershipManager(): JSX.Element {
+interface OwnershipManagerPropsTypes {
+    guardianContractAddress: string;
+}
+
+function OwnershipManager({
+    guardianContractAddress,
+}: OwnershipManagerPropsTypes): JSX.Element {
+    const [owner, setOwner] = useState<string>("");
+
+    const { runContractFunction: getOwner } = useWeb3Contract({
+        abi: abi,
+        contractAddress: guardianContractAddress,
+        functionName: "owner",
+        params: {},
+    });
+
+    useEffect(() => {
+        (async () => {
+            const owner = (await getOwner()) as string;
+            setOwner(owner);
+        })();
+    }, []);
+
     return (
         <div>
             <div className="flex flex-col justify-czenter items-center mt-8">
@@ -10,7 +35,8 @@ function OwnershipManager(): JSX.Element {
                     Current Wallet Owner
                 </h1>
                 <h3 className="mt-6 mb-16 text-lg">
-                    0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+                    {owner.slice(0, 6)}...
+                    {owner.slice(owner.length - 6, owner.length)}
                 </h3>
 
                 <Input
@@ -47,9 +73,9 @@ function OwnershipManager(): JSX.Element {
                     Confirmed By:
                 </h2>
                 <ol>
+                    {/* <GuardianAndConfirmation />
                     <GuardianAndConfirmation />
-                    <GuardianAndConfirmation />
-                    <GuardianAndConfirmation />
+                    <GuardianAndConfirmation /> */}
                 </ol>
             </div>
             <div className="flex flex-col items-center mt-4">

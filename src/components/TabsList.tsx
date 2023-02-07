@@ -77,7 +77,9 @@ function TabsList(): JSX.Element {
                         </div>
                     }
                 >
-                    <OwnershipManager />
+                    <OwnershipManager
+                        guardianContractAddress={guardianContractAddress!}
+                    />
                 </Tab>
                 <Tab
                     tabKey={4}

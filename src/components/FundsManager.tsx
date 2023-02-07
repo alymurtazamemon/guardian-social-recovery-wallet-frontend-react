@@ -210,6 +210,12 @@ function FundsManager({
                 "Empty Guardians List",
                 "The list of guardians is empty. Please add a guardian and try again."
             );
+        } else if (error.message.includes("Error__InvalidLimit")) {
+            _showNotification(
+                NotificationType.error,
+                "Invalid Limit",
+                "The limit entered is not valid. Please check and enter a valid limit."
+            );
         } else {
             _showNotification(
                 NotificationType.error,

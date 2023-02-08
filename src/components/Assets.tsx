@@ -25,6 +25,7 @@ const { ethereum } = window as any;
 function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
     const dispatch = useNotification();
 
+    let [loading, setLoading] = useState(false);
     const [walletBalance, setWalletBalance] = useState("0");
     const [walletBalanceInUSD, setWalletBalanceInUSD] = useState("0");
     const [amount, setAmount] = useState<number>();

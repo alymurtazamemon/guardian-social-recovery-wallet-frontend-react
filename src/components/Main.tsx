@@ -102,6 +102,11 @@ function Main(): JSX.Element {
 
         await tx.wait(1);
 
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+
         const walletAddress = (await getWallet()) as string;
 
         setLoading(false);
@@ -211,6 +216,10 @@ function Main(): JSX.Element {
         });
     }
 
+    function timeout(delay: number) {
+        return new Promise((res) => setTimeout(res, delay));
+    }
+
     return (
         <div>
             {isGuardian && !isGuardianConfirmed ? (
@@ -249,16 +258,18 @@ function Main(): JSX.Element {
                         <TextButton
                             text="Yes Create"
                             onClick={handleYesOnClick}
+                            disabled={loading}
                         />
                         <div className="mx-4"></div>
                         <TextButton
                             text="No Do not Create"
                             onClick={handleNoOnClick}
+                            disabled={loading}
                         />
-                        {loading && (
-                            <LoadingIndicator text="Transaction pending..." />
-                        )}
                     </div>
+                    {loading && (
+                        <LoadingIndicator text="Transaction pending..." />
+                    )}
                 </div>
             ) : isOwner == undefined ? (
                 <div className="flex flex-col items-center">

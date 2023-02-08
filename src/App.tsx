@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import { useEffect } from "react";
 import Intro from "./components/Intro";
 import TabsList from "./components/TabsList";
+import Main from "./components/Main";
 
 function App() {
     const { isWeb3Enabled } = useMoralis();
@@ -16,7 +17,7 @@ function App() {
     return isWeb3Enabled ? (
         <div className="h-screen mx-72">
             <Header />
-            <TabsList />
+            <Main />
         </div>
     ) : (
         <Intro />

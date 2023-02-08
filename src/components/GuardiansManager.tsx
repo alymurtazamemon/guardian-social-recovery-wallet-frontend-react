@@ -5,8 +5,10 @@ import { useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
 import { AiFillBell } from "react-icons/ai";
 import { BigNumber, ContractTransaction } from "ethers";
+import LoadingIndicator from "./LoadingIndicator";
 
 interface GuardianManagerPropsTypes {
+    chainId: string;
     guardianContractAddress: string;
 }
 
@@ -17,6 +19,7 @@ enum NotificationType {
 }
 
 function GuardiansManager({
+    chainId,
     guardianContractAddress,
 }: GuardianManagerPropsTypes): JSX.Element {
     const dispatch = useNotification();
@@ -31,6 +34,7 @@ function GuardiansManager({
         useState<string>();
     const [lastGuardianRemovalTime, setLastGuardianRemovalTime] =
         useState<string>();
+    let [loading, setLoading] = useState(false);
 
     const { runContractFunction: getGuardians } = useWeb3Contract({
         abi: abi,
@@ -139,10 +143,17 @@ function GuardiansManager({
     }
 
     async function handleAddGuardianOnSuccess(tx: ContractTransaction) {
+        setLoading(true);
         await tx.wait(1);
 
         const guardians = (await getGuardians()) as string[];
         const addTimestamp = (await getLastGuardianAddTime()) as BigNumber;
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+        setLoading(false);
 
         _showNotification(
             NotificationType.success,
@@ -186,11 +197,18 @@ function GuardiansManager({
     }
 
     async function handleChangeGuardianOnSuccess(tx: ContractTransaction) {
+        setLoading(true);
         await tx.wait(1);
 
         const guardians = (await getGuardians()) as string[];
         const changeTimestamp =
             (await getLastGuardianChangeTime()) as BigNumber;
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+        setLoading(false);
 
         _showNotification(
             NotificationType.success,
@@ -226,11 +244,18 @@ function GuardiansManager({
     }
 
     async function handleRemoveGuardianOnSuccess(tx: ContractTransaction) {
+        setLoading(true);
         await tx.wait(1);
 
         const guardians = (await getGuardians()) as string[];
         const removalTimestamp =
             (await getLastGuardianRemovalTime()) as BigNumber;
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+        setLoading(false);
 
         _showNotification(
             NotificationType.success,
@@ -330,6 +355,10 @@ function GuardiansManager({
         });
     }
 
+    function timeout(delay: number) {
+        return new Promise((res) => setTimeout(res, delay));
+    }
+
     return (
         <div>
             <div className="flex flex-col justify-czenter items-center mt-8">
@@ -345,6 +374,7 @@ function GuardiansManager({
                         );
                     })}
                 </ol>
+                {loading && <LoadingIndicator text="Transaction pending..." />}
             </div>
             <div className="mb-16">
                 <h1 className="text-2xl text-black font-extrabold">
@@ -385,6 +415,7 @@ function GuardiansManager({
                 <TextButton
                     text="Add Guardian"
                     onClick={handleAddGuardianClick}
+                    disabled={loading}
                 />
                 <div className="flex w-full px-20">
                     <Input
@@ -417,6 +448,7 @@ function GuardiansManager({
                 <TextButton
                     text="Change Guardian"
                     onClick={handleChangeGuardianOnClick}
+                    disabled={loading}
                 />
                 <Input
                     label="Remove Guardian"
@@ -434,6 +466,7 @@ function GuardiansManager({
                 <TextButton
                     text="Remove Guardian"
                     onClick={handleRemoveGuardianOnClick}
+                    disabled={loading}
                 />
             </div>
         </div>

@@ -95,6 +95,7 @@ function TabsList({
                 >
                     <GuardiansManager
                         guardianContractAddress={walletContractAddress!}
+                        chainId={chainId}
                     />
                 </Tab>
             </TabList>

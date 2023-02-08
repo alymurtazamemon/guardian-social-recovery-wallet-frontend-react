@@ -6,8 +6,10 @@ import { abi } from "../constants";
 import { useMoralis, useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
 import { BigNumber, ContractTransaction, ethers } from "ethers";
+import LoadingIndicator from "./LoadingIndicator";
 
 interface FundsManagerPropsTypes {
+    chainId: string;
     guardianContractAddress: string;
 }
 
@@ -24,6 +26,7 @@ enum ParentComponent {
 }
 
 function FundsManager({
+    chainId,
     guardianContractAddress,
 }: FundsManagerPropsTypes): JSX.Element {
     const dispatch = useNotification();
@@ -44,6 +47,7 @@ function FundsManager({
     const [limit, setLimit] = useState<number>();
     const [confirmationTime, setConfirmationTime] = useState<string>("0");
     const [guardians, setGuardians] = useState<string[]>([]);
+    let [loading, setLoading] = useState(false);
 
     const { runContractFunction: getOwner } = useWeb3Contract({
         abi: abi,
@@ -192,6 +196,7 @@ function FundsManager({
     }
 
     async function handleUpdateLimitOnSuccess(tx: ContractTransaction) {
+        setLoading(true);
         await tx.wait(1);
 
         const dailyLimit = (await getDailyTransferLimit()) as String;
@@ -202,6 +207,12 @@ function FundsManager({
             (await getLastDailyTransferUpdateRequestTime()) as BigNumber;
         const confirmationTime =
             (await getDailyTransferLimitUpdateConfirmationTime()) as BigNumber;
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+        setLoading(false);
 
         _showNotification(
             NotificationType.info,
@@ -234,7 +245,14 @@ function FundsManager({
     }
 
     async function handleConfirmRequestOnSuccess(tx: ContractTransaction) {
+        setLoading(true);
         await tx.wait(1);
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+        setLoading(false);
 
         _showNotification(
             NotificationType.info,
@@ -252,12 +270,19 @@ function FundsManager({
     }
 
     async function handleConfirmAndUpdateOnSuccess(tx: ContractTransaction) {
+        setLoading(true);
         await tx.wait(1);
 
         const dailyLimit = (await getDailyTransferLimit()) as String;
         const dailyLimitInUsd = (await getDailyTransferLimitInUSD()) as String;
         const requestStatus =
             (await getDailyTransferLimitUpdateRequestStatus()) as boolean;
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+        setLoading(false);
 
         _showNotification(
             NotificationType.success,
@@ -281,7 +306,14 @@ function FundsManager({
     }
 
     async function handleWithdrawMyRequestOnSuccess(tx: ContractTransaction) {
+        setLoading(true);
         await tx.wait(1);
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+        setLoading(false);
 
         const requestStatus =
             (await getDailyTransferLimitUpdateRequestStatus()) as boolean;
@@ -390,6 +422,10 @@ function FundsManager({
         });
     }
 
+    function timeout(delay: number) {
+        return new Promise((res) => setTimeout(res, delay));
+    }
+
     return (
         <div>
             <div className="flex flex-col justify-czenter items-center mt-8">
@@ -402,7 +438,7 @@ function FundsManager({
                 <h3 className="mt-2 mb-16 text-lg">
                     ${ethers.utils.formatEther(dailyTransferLimitInUsd)} USD
                 </h3>
-
+                {loading && <LoadingIndicator text="Transaction pending..." />}
                 {owner.toLowerCase() == account?.toLowerCase() &&
                     !dailyTransferLimitUpdateRequestStatus && (
                         <Input
@@ -424,6 +460,7 @@ function FundsManager({
                         <TextButton
                             text="Request To Update Limit"
                             onClick={handleRequestToUpdateLimitOnClick}
+                            disabled={loading}
                         />
                     )}
             </div>
@@ -486,18 +523,21 @@ function FundsManager({
                                 <TextButton
                                     text="Confirm Request"
                                     onClick={handleConfirmRequestOnClick}
+                                    disabled={loading}
                                 />
                             )}
                             {owner.toLowerCase() == account?.toLowerCase() && (
                                 <TextButton
                                     text="Confirm And Update Daily Transfer Limit"
                                     onClick={handleConfirmAndUpdateOnClick}
+                                    disabled={loading}
                                 />
                             )}
                             {owner.toLowerCase() == account?.toLowerCase() && (
                                 <TextButton
                                     text="Withdraw My Request"
                                     onClick={handleWithdrawMyRequest}
+                                    disabled={loading}
                                 />
                             )}
                         </div>

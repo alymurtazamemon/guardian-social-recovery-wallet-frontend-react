@@ -97,20 +97,20 @@ function Assets({
                 const provider = new ethers.providers.Web3Provider(ethereum);
                 const signer = provider.getSigner();
 
-                setLoading(true);
                 const tx: ContractTransaction = await signer.sendTransaction({
                     to: guardianContractAddress,
                     data: "0x",
                     value: ethers.utils.parseEther(amount.toString()),
                 });
 
+                setLoading(true);
+
+                await tx.wait(1);
+
                 // * add a waiting delay for hardhat network.
                 if (chainId == "31337") {
                     await timeout(5000);
                 }
-
-                await tx.wait(1);
-
                 setLoading(false);
 
                 const balance = (await getBalance()) as String;

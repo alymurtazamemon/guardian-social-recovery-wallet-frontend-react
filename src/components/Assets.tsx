@@ -9,6 +9,7 @@ import { abi } from "../constants";
 import { Input, useNotification } from "@web3uikit/core";
 import { AiFillBell } from "react-icons/ai";
 import { ContractTransaction, ethers } from "ethers";
+import LoadingIndicator from "./LoadingIndicator";
 
 enum NotificationType {
     warning,
@@ -17,12 +18,16 @@ enum NotificationType {
 }
 
 interface AssetsPropsTypes {
+    chainId: string;
     guardianContractAddress: string;
 }
 
 const { ethereum } = window as any;
 
-function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
+function Assets({
+    chainId,
+    guardianContractAddress,
+}: AssetsPropsTypes): JSX.Element {
     const dispatch = useNotification();
 
     let [loading, setLoading] = useState(false);
@@ -92,13 +97,21 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 const provider = new ethers.providers.Web3Provider(ethereum);
                 const signer = provider.getSigner();
 
+                setLoading(true);
                 const tx: ContractTransaction = await signer.sendTransaction({
                     to: guardianContractAddress,
                     data: "0x",
                     value: ethers.utils.parseEther(amount.toString()),
                 });
 
+                // * add a waiting delay for hardhat network.
+                if (chainId == "31337") {
+                    await timeout(5000);
+                }
+
                 await tx.wait(1);
+
+                setLoading(false);
 
                 const balance = (await getBalance()) as String;
                 const balanceInUSD = (await getBalanceInUSD()) as String;
@@ -145,7 +158,16 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
     }
 
     async function handleSendOnSuccess(tx: ContractTransaction) {
+        setLoading(true);
+
         await tx.wait(1);
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+
+        setLoading(false);
 
         const balance = (await getBalance()) as String;
         const balanceInUSD = (await getBalanceInUSD()) as String;
@@ -180,10 +202,19 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
     }
 
     async function handleSendAllOnSuccess(tx: ContractTransaction) {
+        setLoading(true);
+
         await tx.wait(1);
 
         const balance = (await getBalance()) as String;
         const balanceInUSD = (await getBalanceInUSD()) as String;
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+
+        setLoading(false);
 
         _showNotification(
             NotificationType.success,
@@ -269,6 +300,10 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
         });
     }
 
+    function timeout(delay: number) {
+        return new Promise((res) => setTimeout(res, delay));
+    }
+
     return (
         <div className="flex flex-col justify-czenter items-center mt-8">
             <div className="border border-gray-400 w-fit p-2 rounded-full">
@@ -284,6 +319,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 <button
                     className="flex flex-col items-center justify-center mx-4"
                     onClick={handleOnDepositClick}
+                    disabled={loading}
                 >
                     <BsFillArrowDownCircleFill color="#0D72C4" size={40} />
                     <h1 className="text-[#0D72C4] m-2">Deposit</h1>
@@ -291,6 +327,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 <button
                     className="flex flex-col items-center justify-center mx-4"
                     onClick={handleOnSendClick}
+                    disabled={loading}
                 >
                     <BsFillArrowUpRightCircleFill color="#0D72C4" size={40} />
                     <h1 className="text-[#0D72C4] m-2">Send</h1>
@@ -298,6 +335,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 <button
                     className="flex flex-col items-center justify-center mx-4"
                     onClick={handleOnSendAllClick}
+                    disabled={loading}
                 >
                     <BsFillArrowUpRightCircleFill color="#0D72C4" size={40} />
                     <h1 className="text-[#0D72C4] m-2">Send All</h1>
@@ -332,6 +370,7 @@ function Assets({ guardianContractAddress }: AssetsPropsTypes): JSX.Element {
                 value={address}
                 onChange={(event) => setAddress(event.target.value)}
             />
+            {loading && <LoadingIndicator text="Transaction pending..." />}
         </div>
     );
 }

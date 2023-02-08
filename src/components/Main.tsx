@@ -289,7 +289,10 @@ function Main(): JSX.Element {
                     </div>
                 </div>
             ) : (
-                <TabsList walletContractAddress={walletContractAddress!} />
+                <TabsList
+                    walletContractAddress={walletContractAddress!}
+                    chainId={chainId}
+                />
             )}
         </div>
     );

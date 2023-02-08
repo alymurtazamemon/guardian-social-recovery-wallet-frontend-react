@@ -9,9 +9,13 @@ import GuardiansManager from "./GuardiansManager";
 
 interface TabsListPropsTypes {
     walletContractAddress: string;
+    chainId: string;
 }
 
-function TabsList({ walletContractAddress }: TabsListPropsTypes): JSX.Element {
+function TabsList({
+    chainId,
+    walletContractAddress,
+}: TabsListPropsTypes): JSX.Element {
     return (
         <div className="p-12 bg-white min-h-screen">
             <TabList
@@ -32,7 +36,10 @@ function TabsList({ walletContractAddress }: TabsListPropsTypes): JSX.Element {
                         </div>
                     }
                 >
-                    <Assets guardianContractAddress={walletContractAddress!} />
+                    <Assets
+                        guardianContractAddress={walletContractAddress!}
+                        chainId={chainId}
+                    />
                 </Tab>
                 <Tab
                     tabKey={2}

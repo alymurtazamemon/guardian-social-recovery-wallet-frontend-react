@@ -57,6 +57,7 @@ function TabsList({
                 >
                     <FundsManager
                         guardianContractAddress={walletContractAddress!}
+                        chainId={chainId}
                     />
                 </Tab>
                 <Tab
@@ -75,6 +76,7 @@ function TabsList({
                 >
                     <OwnershipManager
                         guardianContractAddress={walletContractAddress!}
+                        chainId={chainId}
                     />
                 </Tab>
                 <Tab

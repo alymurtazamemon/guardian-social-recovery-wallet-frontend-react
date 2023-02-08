@@ -6,8 +6,10 @@ import { useWeb3Contract } from "react-moralis";
 import { useEffect, useState } from "react";
 import { BigNumber, ContractTransaction } from "ethers";
 import { AiFillBell } from "react-icons/ai";
+import LoadingIndicator from "./LoadingIndicator";
 
 interface OwnershipManagerPropsTypes {
+    chainId: string;
     guardianContractAddress: string;
 }
 
@@ -24,6 +26,7 @@ enum ParentComponent {
 }
 
 function OwnershipManager({
+    chainId,
     guardianContractAddress,
 }: OwnershipManagerPropsTypes): JSX.Element {
     const dispatch = useNotification();
@@ -37,6 +40,7 @@ function OwnershipManager({
     const [noOfConfirmations, setNoOfConfirmations] = useState<number>();
     const [confirmationTime, setConfirmationTime] = useState<string>("0");
     const [guardians, setGuardians] = useState<string[]>([]);
+    let [loading, setLoading] = useState(false);
 
     const { runContractFunction: getOwner } = useWeb3Contract({
         abi: abi,
@@ -166,6 +170,7 @@ function OwnershipManager({
     }
 
     async function handleUpdateOwnerRequestOnSuccess(tx: ContractTransaction) {
+        setLoading(true);
         await tx.wait(1);
 
         const requestTime =
@@ -175,6 +180,12 @@ function OwnershipManager({
         const confirmationTime =
             (await getOwnerUpdateConfirmationTime()) as BigNumber;
         const guardians = (await getGuardians()) as string[];
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+        setLoading(false);
 
         _showNotification(
             NotificationType.info,
@@ -211,7 +222,15 @@ function OwnershipManager({
     async function handleConfirmOwnerUpdateRequestOnSuccess(
         tx: ContractTransaction
     ) {
+        setLoading(true);
+
         await tx.wait(1);
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+        setLoading(false);
 
         const requiredConfirmations =
             (await getRequiredConfirmations()) as BigNumber;
@@ -258,8 +277,17 @@ function OwnershipManager({
     async function handleWithdrawExpiredRequestOnSuccess(
         tx: ContractTransaction
     ) {
+        setLoading(true);
+
         await tx.wait(1);
+
         const requestStatus = (await getIsOwnerUpdateRequested()) as boolean;
+
+        // * add a waiting delay for hardhat network.
+        if (chainId == "31337") {
+            await timeout(5000);
+        }
+        setLoading(false);
 
         _showNotification(
             NotificationType.success,
@@ -357,6 +385,10 @@ function OwnershipManager({
         });
     }
 
+    function timeout(delay: number) {
+        return new Promise((res) => setTimeout(res, delay));
+    }
+
     return (
         <div>
             <div className="flex flex-col justify-czenter items-center mt-8">
@@ -367,7 +399,7 @@ function OwnershipManager({
                     {owner.slice(0, 6)}...
                     {owner.slice(owner.length - 6, owner.length)}
                 </h3>
-
+                {loading && <LoadingIndicator text="Transaction pending..." />}
                 {!ownerUpdateRequestStatus && (
                     <Input
                         label="New Address"
@@ -386,6 +418,7 @@ function OwnershipManager({
                     <TextButton
                         text="Request To Update Owner"
                         onClick={handleUpdateOwnerRequestOnClick}
+                        disabled={loading}
                     />
                 )}
             </div>
@@ -440,10 +473,12 @@ function OwnershipManager({
                             <TextButton
                                 text="Confirm Owner Update Request"
                                 onClick={handleConfirmOwnerUpdateRequestOnClick}
+                                disabled={loading}
                             />
                             <TextButton
                                 text="Withdraw Expired Request."
                                 onClick={handleWithdrawExpiredRequest}
+                                disabled={loading}
                             />
                         </div>
                     </div>

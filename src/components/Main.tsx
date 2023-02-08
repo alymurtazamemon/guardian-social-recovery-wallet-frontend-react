@@ -10,6 +10,7 @@ import { ContractTransaction } from "ethers";
 import { AiFillBell } from "react-icons/ai";
 import { Input, useNotification } from "@web3uikit/core";
 import TabsList from "./TabsList";
+import LoadingIndicator from "./LoadingIndicator";
 
 interface contractsAddressesInterface {
     [key: string]: string[];
@@ -44,6 +45,7 @@ function Main(): JSX.Element {
     const [walletContractAddress, setWalletContractAddress] =
         useState<string>();
     const [ownerAddress, setOwnerAddress] = useState<string>();
+    let [loading, setLoading] = useState(false);
 
     const { runContractFunction: getWallet } = useWeb3Contract({
         abi: guardianFactoryAbi,
@@ -96,9 +98,13 @@ function Main(): JSX.Element {
     }
 
     async function handleCreateWalletOnSuccess(tx: ContractTransaction) {
+        setLoading(true);
+
         await tx.wait(1);
 
         const walletAddress = (await getWallet()) as string;
+
+        setLoading(false);
 
         _showNotification(
             NotificationType.success,
@@ -249,6 +255,9 @@ function Main(): JSX.Element {
                             text="No Do not Create"
                             onClick={handleNoOnClick}
                         />
+                        {loading && (
+                            <LoadingIndicator text="Transaction pending..." />
+                        )}
                     </div>
                 </div>
             ) : isOwner == undefined ? (

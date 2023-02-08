@@ -6,14 +6,16 @@ interface LoadingIndicatorPropsTypes {
 
 function LoadingIndicator({ text }: LoadingIndicatorPropsTypes): JSX.Element {
     return (
-        <Loading
-            direction="bottom"
-            fontSize={16}
-            size={12}
-            spinnerColor="#35aee2"
-            spinnerType="wave"
-            text={text}
-        />
+        <div className="my-8">
+            <Loading
+                direction="bottom"
+                fontSize={16}
+                size={12}
+                spinnerColor="#0D72C4"
+                spinnerType="wave"
+                text={text}
+            />
+        </div>
     );
 }
 

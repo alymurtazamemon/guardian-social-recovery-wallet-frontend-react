@@ -11,8 +11,8 @@ function App() {
 
     useEffect(() => {}, [isWeb3Enabled]);
 
-    console.log("App Component Called");
-    console.log(`isWeb3Enabled: ${isWeb3Enabled}`);
+    // console.log("App Component Called");
+    // console.log(`isWeb3Enabled: ${isWeb3Enabled}`);
 
     return isWeb3Enabled ? (
         <div className="h-screen mx-72">
